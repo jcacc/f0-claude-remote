@@ -48,4 +48,4 @@ Hold Right on it to return to Bluetooth,
 with no need to leave the app.
 Holding Back leaves the app, from either link.
 
-Nothing is saved: the next launch opens on Bluetooth.
+The link is not saved: the next launch opens on Bluetooth.

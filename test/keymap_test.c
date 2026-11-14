@@ -849,6 +849,18 @@ static void test_fresh_keymap_vibrates(void) {
     keymap_free(keymap);
 }
 
+static void test_keymap_takes_the_saved_vibration(void) {
+    Keymap* keymap = keymap_alloc();
+    keymap_set_vibration(keymap, false);
+    assert(!keymap_vibration(keymap));
+    keymap_set_vibration(keymap, true);
+    assert(keymap_vibration(keymap));
+    assert(keymap_mode(keymap) == ModeNoLink);
+    assert(keymap_link(keymap) == LinkBluetooth);
+    assert(keymap_wait(keymap) == KeymapWaitStart);
+    keymap_free(keymap);
+}
+
 static void test_side_tap_on_the_options_switches_vibration(void) {
     Keymap* (*const allocs[])(void) = {
         keymap_test_alloc_options,
@@ -1072,6 +1084,7 @@ int main(void) {
     test_run(test_back_tap_begun_elsewhere_opens_nothing);
     test_run(test_options_act_only_on_held_back);
     test_run(test_fresh_keymap_vibrates);
+    test_run(test_keymap_takes_the_saved_vibration);
     test_run(test_side_tap_on_the_options_switches_vibration);
     test_run(test_nothing_else_switches_vibration);
     test_run(test_vibration_outlasts_the_options);

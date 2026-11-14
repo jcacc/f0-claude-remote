@@ -133,7 +133,7 @@ The value of each of `options`' options SHALL be held in `src/core/` by the keym
 and whether an action vibrates the device SHALL be decided there from that value.
 The keymap's suite SHALL pin when the value changes and when it stays,
 the feedback's suite the buzz for either value,
-and the platform SHALL show the value and buzz by those answers alone, at the opening as after an event.
+and the platform SHALL show the value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
 
 #### Scenario: Changed
 - **WHEN** Left or Right is tapped on the options, from a press made there
@@ -152,5 +152,23 @@ and the platform SHALL show the value and buzz by those answers alone, at the op
 
 #### Scenario: The platform follows
 - **WHEN** `git grep -n 'keymap_vibration' -- src/platform` runs
-- **THEN** it prints three lines of `app.c`:
-  the one that opens the screen, the one that sets it after an event, and the one that asks about the buzz
+- **THEN** it prints five lines of `app.c`:
+  the two that open the file and the screen, the two that set them after an event,
+  and the one that asks about the buzz
+
+### Requirement: The core takes the options the card holds
+The keymap SHALL open with each of `options`' options as it is by default,
+and SHALL take from the platform, once, at the opening, the value read from the SD card, moving nothing else.
+The keymap's suite SHALL pin both.
+
+#### Scenario: Opened
+- **WHEN** a keymap opens
+- **THEN** it answers Vibration `On`
+
+#### Scenario: Taken from the card
+- **WHEN** a keymap just opened is handed a saved Vibration, `Off` and then `On`
+- **THEN** it answers each in turn, and the mode, the link and the wait it opened with
+
+#### Scenario: Handed once
+- **WHEN** `git grep -n 'keymap_set_vibration' -- src/platform` runs
+- **THEN** it prints one line of `app.c`

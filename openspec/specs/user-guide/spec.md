@@ -78,7 +78,9 @@ the buzz and flash confirming it, and each screen, below its screenshot.
 - **THEN** it holds the twelve rows of the keys table,
   what the left arrow does on an empty prompt,
   that Vibration `Off` leaves the flash alone to confirm,
-  and the main screen, the options with what Left, Right and Back do there, `Listening`, `No link` with `Keys are not sent` and Right's hold for USB and back,
+  and the main screen, the options with what Left, Right and Back do there
+  and that a change is saved on the SD card for the next launch,
+  `Listening`, `No link` with `Keys are not sent` and Right's hold for USB and back,
   `Voice stopped: release OK`,
   and `Reconnect stopped` with what a press does there
 

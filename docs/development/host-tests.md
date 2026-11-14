@@ -35,5 +35,5 @@ A `.c` file under `test/` builds into no package, and lint checks it.
 ## What only the device checks
 
 The platform layer, `src/platform/`, and the view, `src/ui/`, run only on the device:
-the Bluetooth and USB links, the buttons, the screen, the buzz and the flash, the dolphin's XP,
+the Bluetooth and USB links, the buttons, the screen, the options' file on the SD card, the buzz and the flash, the dolphin's XP,
 and what the keys do in Claude Code.

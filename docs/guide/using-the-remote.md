@@ -58,8 +58,9 @@ as the legend `HOLD` and `TAP` in the top row says.
 ![The options](../assets/screenshot/options-bt.png)
 
 **`Options`** open with a tap on Back from the main screen, where a gear ends Back's plate.
-`Vibration` is `On` at each launch,
+`Vibration` is `On` until it is changed,
 and a tap on Left or Right turns it `Off` or `On` at once, without a buzz.
+A change is saved on the SD card at once, and the next launch opens with it.
 With it `Off` no action buzzes, and each still acts and flashes.
 A tap on Back returns to the main screen, holding it leaves the app,
 and no other button acts there.

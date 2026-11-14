@@ -215,6 +215,10 @@ Action keymap_time_out(Keymap* keymap) {
     return ActionGiveUp;
 }
 
+void keymap_set_vibration(Keymap* keymap, bool vibration) {
+    keymap->vibration = vibration;
+}
+
 KeymapWait keymap_wait(const Keymap* keymap) {
     return keymap->wait;
 }

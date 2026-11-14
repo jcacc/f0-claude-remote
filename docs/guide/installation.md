@@ -24,7 +24,7 @@ The app then lives under Apps → Bluetooth on the device, as `Claude Remote`.
 To update, upload the newer Release's file over the old one.
 
 To remove, delete `apps/Bluetooth/f0_claude_remote.fap`,
-and `apps_data/f0_claude_remote/`, which holds the pairing's keys.
+and `apps_data/f0_claude_remote/`, which holds the pairing's keys and the options.
 Then forget `Claude Remote` on the computer.
 
 ## From the source

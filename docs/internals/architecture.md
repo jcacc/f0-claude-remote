@@ -37,6 +37,7 @@ and the platform supplies it, as `transport_hid.c` does.
 | `src/platform/app.h`, `src/platform/app.c` | Runs the application's event loop |
 | `src/platform/backlight.h`, `src/platform/backlight.c` | Holds the display lit while asked to |
 | `src/platform/keymap_input.h`, `src/platform/keymap_input.c` | Translates a firmware event for the keymap |
+| `src/platform/options_file.h`, `src/platform/options_file.c` | Keeps the options in a file on the SD card |
 | `src/platform/screen.h`, `src/platform/screen.c` | Keeps what the display shows |
 | `src/platform/transport_hid.h`, `src/platform/transport_hid.c` | Routes the core's keys to the link in use |
 | `src/platform/transport_link.h` | Names what `transport_hid.c` needs of a link |
@@ -54,6 +55,7 @@ and the platform supplies it, as `transport_hid.c` does.
 7. `transport_bluetooth.c` or `transport_usb.c`: puts the code into the link's report.
 
 Before step 5, `app.c` hands `screen.c` the mode, the link and Vibration `keymap.c` holds,
+`options_file.c` that Vibration, which writes it to the SD card unless it is the one held,
 then `transport_hid.c` that link, which switches to it unless it is the one in use.
 After step 7, it hands the firmware's dolphin the deed `deed.c` names,
 buzzes as `feedback.c` says of the action and Vibration, and has `screen.c` flash.
@@ -67,6 +69,9 @@ whose answer `actions.c` sends as a press's would be.
 The wait takes a timer in `app.c`, started and stopped as `keymap.c`'s `keymap_wait` answers after every event.
 Its end goes to `keymap.c` too, whose answer `actions.c` turns into withdrawing the link,
 and `app.c` has `backlight.c` go dark, as `display.c` says of the new mode.
+
+At the opening, `app.c` hands `options_file.c` the Vibration `keymap.c` opens with,
+and `keymap.c` the one `options_file.c` answers: read from the SD card, or the one handed where it reads none.
 
 The queues exist because every function of an event loop must be called from the thread that made it
 (documented: [`event_loop.h`](https://github.com/flipperdevices/flipperzero-firmware/blob/1.5.1/furi/core/event_loop.h#L15)).

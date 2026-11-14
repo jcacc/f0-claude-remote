@@ -44,6 +44,8 @@ Action keymap_set_connected(Keymap* keymap, bool connected);
 
 Action keymap_time_out(Keymap* keymap);
 
+void keymap_set_vibration(Keymap* keymap, bool vibration);
+
 KeymapWait keymap_wait(const Keymap* keymap);
 
 uint32_t keymap_wait_ms(const Keymap* keymap);

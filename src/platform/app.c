@@ -10,6 +10,7 @@
 #include "../core/feedback.h"
 #include "backlight.h"
 #include "keymap_input.h"
+#include "options_file.h"
 #include "screen.h"
 #include "transport_hid.h"
 
@@ -21,6 +22,7 @@ struct App {
     NotificationApp* notification;
     Backlight* backlight;
     Keymap* keymap;
+    OptionsFile* options_file;
     Screen* screen;
     Transport* transport;
 };
@@ -68,6 +70,7 @@ static void app_settle(App* app, Action action) {
     screen_set_mode(app->screen, keymap_mode(app->keymap));
     screen_set_link(app->screen, keymap_link(app->keymap));
     screen_set_vibration(app->screen, keymap_vibration(app->keymap));
+    options_file_set_vibration(app->options_file, keymap_vibration(app->keymap));
     transport_hid_set_link(app->transport, keymap_link(app->keymap));
     if(action != ActionNone) {
         app_perform(app, action);
@@ -118,6 +121,8 @@ App* app_alloc(void) {
         app->event_loop, app_wait_callback, FuriEventLoopTimerTypeOnce, app);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->keymap = keymap_alloc();
+    app->options_file = options_file_alloc(keymap_vibration(app->keymap));
+    keymap_set_vibration(app->keymap, options_file_vibration(app->options_file));
     app->backlight = backlight_alloc(display_lit(keymap_mode(app->keymap)));
     app->screen = screen_alloc(
         app->event_loop,
@@ -133,6 +138,7 @@ App* app_alloc(void) {
 void app_free(App* app) {
     screen_free(app->screen);
     transport_hid_free(app->transport);
+    options_file_free(app->options_file);
     keymap_free(app->keymap);
     backlight_free(app->backlight);
     furi_record_close(RECORD_NOTIFICATION);
