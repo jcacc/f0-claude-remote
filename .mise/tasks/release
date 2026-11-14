@@ -72,7 +72,5 @@ git commit -m "chore: release $name"
 trap 'rm -rf "$dir"' EXIT
 
 git flow finish -m "$name"
-# git-flow-next 2.0.0 ends the finish on main.
-git checkout -q develop
 
 git push --atomic origin main develop "v$name"

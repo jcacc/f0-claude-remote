@@ -5,7 +5,7 @@ description: How a change is planned, implemented and landed with OpenSpec, git-
 # Workflow
 
 Development is spec-driven, on [OpenSpec](https://github.com/Fission-AI/OpenSpec),
-through Claude Code's `/opsx:*` commands.
+through Claude Code's `openspec-*` skills.
 [`CLAUDE.md`](https://github.com/petr-korobeinikov/f0-claude-remote/blob/develop/CLAUDE.md)
 holds the process; in short:
 
