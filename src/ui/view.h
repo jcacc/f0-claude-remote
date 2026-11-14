@@ -6,4 +6,4 @@
 #include "../core/link.h"
 #include "../core/mode.h"
 
-void view_draw(Canvas* canvas, Mode mode, Link link, Action flash);
+void view_draw(Canvas* canvas, Mode mode, Link link, Action flash, bool vibration);

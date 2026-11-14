@@ -51,3 +51,5 @@ uint32_t keymap_wait_ms(const Keymap* keymap);
 Mode keymap_mode(const Keymap* keymap);
 
 Link keymap_link(const Keymap* keymap);
+
+bool keymap_vibration(const Keymap* keymap);

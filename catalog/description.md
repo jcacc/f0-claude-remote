@@ -7,8 +7,8 @@ whatever the computer's keyboard layout.
 To the computer the Flipper is a keyboard, paired once,
 that reconnects by itself within a second of a drop.
 With no Bluetooth link, holding Right makes it a USB keyboard over the cable.
-Each action confirms itself with a buzz,
-so no buzz means nothing was sent.
+Each action buzzes and flashes;
+a tap on Back opens the options, where the buzz turns off.
 A dictation earns the dolphin 1 XP and a /clear 10.
 
 ## Buttons
@@ -21,6 +21,7 @@ A dictation earns the dolphin 1 XP and a /clear 10.
 - **Up, hold:** Ctrl+X, Ctrl+F, which sets effort to high
 - **Down, hold:** Ctrl+X, Ctrl+X, which sets effort to max
 - **Left, hold:** Ctrl+X, Ctrl+L, which runs /clear
+- **Back, tap:** nothing; it opens the options
 - **Back, hold:** nothing; it leaves the app
 
 Dictation, effort and /clear take one block in Claude Code's keybindings.json.

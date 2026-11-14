@@ -75,15 +75,16 @@ the buzz and flash confirming it, and each screen, below its screenshot.
 
 #### Scenario: Content
 - **WHEN** the page is read
-- **THEN** it holds the eleven rows of the keys table,
+- **THEN** it holds the twelve rows of the keys table,
   what the left arrow does on an empty prompt,
-  and the main screen, `Listening`, `No link` with `Keys are not sent` and Right's hold for USB and back,
+  that Vibration `Off` leaves the flash alone to confirm,
+  and the main screen, the options with what Left, Right and Back do there, `Listening`, `No link` with `Keys are not sent` and Right's hold for USB and back,
   `Voice stopped: release OK`,
   and `Reconnect stopped` with what a press does there
 
 #### Scenario: Screenshots
 - **WHEN** the built page is read
-- **THEN** its images are `main.png`, `voice-bt.png`, `no-link-bt.png`, `no-link-usb.png`, `voice-cut-bt.png`
+- **THEN** its images are `main.png`, `options-bt.png`, `voice-bt.png`, `no-link-bt.png`, `no-link-usb.png`, `voice-cut-bt.png`
   and `stopped-bt.png` from `asset/screenshot/`, in that order,
   each directly above the paragraph of the screen it shows
 
@@ -137,10 +138,10 @@ and show the main screen on USB.
 
 ### Requirement: The README shows every screen
 `README.md` SHALL show `asset/screenshot/main.png` on top
-and, in `## Screens` after `## Features`, the other six screenshots, two to a row, each 256 px wide.
+and, in `## Screens` after `## Features`, the other seven screenshots, two to a row and the last alone, each 256 px wide.
 
 #### Scenario: Screens
 - **WHEN** `README.md` is read
 - **THEN** `## Screens` follows `## Features` and shows, row by row,
-  `main-usb.png` and `voice-bt.png`, `no-link-bt.png` and `no-link-usb.png`, `voice-cut-bt.png` and `stopped-bt.png`,
+  `main-usb.png` and `voice-bt.png`, `no-link-bt.png` and `no-link-usb.png`, `voice-cut-bt.png` and `stopped-bt.png`, then `options-bt.png`,
   each `width="256"` with alt text naming its screen

@@ -34,6 +34,25 @@ static Keymap* keymap_test_alloc_on_usb(void) {
     return keymap;
 }
 
+static Action keymap_test_tap(Keymap* keymap, KeymapKey key) {
+    keymap_handle(keymap, key, KeymapEventPress);
+    Action action = keymap_handle(keymap, key, KeymapEventShort);
+    keymap_handle(keymap, key, KeymapEventRelease);
+    return action;
+}
+
+static Keymap* keymap_test_alloc_options(void) {
+    Keymap* keymap = keymap_test_alloc_connected();
+    keymap_test_tap(keymap, KeymapKeyBack);
+    return keymap;
+}
+
+static Keymap* keymap_test_alloc_options_no_link(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    keymap_set_connected(keymap, false);
+    return keymap;
+}
+
 static Action keymap_test_fresh(KeymapKey key, KeymapEvent event) {
     Keymap* keymap = keymap_test_alloc_connected();
     if(event == KeymapEventShort || event == KeymapEventLong) {
@@ -52,8 +71,14 @@ static void test_tap_acts(void) {
     assert(keymap_test_fresh(KeymapKeyOk, KeymapEventShort) == ActionEnter);
 }
 
-static void test_tap_on_back_does_nothing(void) {
-    assert(keymap_test_fresh(KeymapKeyBack, KeymapEventShort) == ActionNone);
+static void test_tap_on_back_opens_the_options(void) {
+    Keymap* keymap = keymap_test_alloc_connected();
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventPress) == ActionNone);
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventShort) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventRelease) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    keymap_free(keymap);
 }
 
 static void test_hold_acts(void) {
@@ -752,9 +777,228 @@ static void test_back_held_through_drop_exits(void) {
     keymap_free(keymap);
 }
 
+static void test_tap_on_back_closes_the_options(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    assert(keymap_test_tap(keymap, KeymapKeyBack) == ActionNone);
+    assert(keymap_mode(keymap) == ModeIdle);
+    keymap_free(keymap);
+
+    keymap = keymap_test_alloc_options_no_link();
+    assert(keymap_test_tap(keymap, KeymapKeyBack) == ActionNone);
+    assert(keymap_mode(keymap) == ModeNoLink);
+    keymap_free(keymap);
+}
+
+static void test_tap_on_back_opens_nothing_elsewhere(void) {
+    Keymap* keymaps[] = {
+        keymap_test_alloc_voice(),
+        keymap_alloc(),
+        keymap_test_alloc_voice_cut(),
+    };
+    for(size_t i = 0; i < sizeof(keymaps) / sizeof(keymaps[0]); i++) {
+        Mode mode = keymap_mode(keymaps[i]);
+        assert(keymap_test_tap(keymaps[i], KeymapKeyBack) == ActionNone);
+        assert(keymap_mode(keymaps[i]) == mode);
+        keymap_free(keymaps[i]);
+    }
+}
+
+static void test_back_tap_begun_elsewhere_opens_nothing(void) {
+    Keymap* keymap = keymap_alloc();
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_set_connected(keymap, true);
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventShort) == ActionNone);
+    assert(keymap_mode(keymap) == ModeIdle);
+    keymap_free(keymap);
+
+    keymap = keymap_test_alloc_voice();
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_handle(keymap, KeymapKeyOk, KeymapEventRelease);
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventShort) == ActionNone);
+    assert(keymap_mode(keymap) == ModeIdle);
+    keymap_free(keymap);
+}
+
+static void test_options_act_only_on_held_back(void) {
+    Keymap* (*const allocs[])(void) = {
+        keymap_test_alloc_options,
+        keymap_test_alloc_options_no_link,
+    };
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        for(KeymapKey key = KeymapKeyUp; key < KeymapKeyMAX; key++) {
+            for(KeymapEvent event = KeymapEventPress; event < KeymapEventMAX; event++) {
+                Keymap* keymap = allocs[i]();
+                Mode mode = keymap_mode(keymap);
+                bool back_tapped = key == KeymapKeyBack && event == KeymapEventShort;
+                Action expected = key == KeymapKeyBack && event == KeymapEventLong ? ActionExit :
+                                                                                     ActionNone;
+                if(event == KeymapEventShort || event == KeymapEventLong) {
+                    keymap_handle(keymap, key, KeymapEventPress);
+                }
+                assert(keymap_handle(keymap, key, event) == expected);
+                assert((keymap_mode(keymap) != mode) == back_tapped);
+                keymap_free(keymap);
+            }
+        }
+    }
+}
+
+static void test_fresh_keymap_vibrates(void) {
+    Keymap* keymap = keymap_alloc();
+    assert(keymap_vibration(keymap));
+    keymap_free(keymap);
+}
+
+static void test_side_tap_on_the_options_switches_vibration(void) {
+    Keymap* (*const allocs[])(void) = {
+        keymap_test_alloc_options,
+        keymap_test_alloc_options_no_link,
+    };
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        Keymap* keymap = allocs[i]();
+        Mode mode = keymap_mode(keymap);
+        assert(keymap_test_tap(keymap, KeymapKeyRight) == ActionNone);
+        assert(!keymap_vibration(keymap));
+        assert(keymap_test_tap(keymap, KeymapKeyLeft) == ActionNone);
+        assert(keymap_vibration(keymap));
+        assert(keymap_test_tap(keymap, KeymapKeyLeft) == ActionNone);
+        assert(!keymap_vibration(keymap));
+        assert(keymap_test_tap(keymap, KeymapKeyRight) == ActionNone);
+        assert(keymap_vibration(keymap));
+        assert(keymap_mode(keymap) == mode);
+        keymap_free(keymap);
+    }
+}
+
+static void test_nothing_else_switches_vibration(void) {
+    Keymap* (*const allocs[])(void) = {
+        keymap_test_alloc_connected,
+        keymap_test_alloc_voice,
+        keymap_alloc,
+        keymap_test_alloc_voice_cut,
+        keymap_test_alloc_stopped,
+        keymap_test_alloc_options,
+        keymap_test_alloc_options_no_link,
+    };
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        for(KeymapKey key = KeymapKeyUp; key < KeymapKeyMAX; key++) {
+            for(KeymapEvent event = KeymapEventPress; event < KeymapEventMAX; event++) {
+                Keymap* keymap = allocs[i]();
+                Mode mode = keymap_mode(keymap);
+                bool on_the_options = mode == ModeOptions || mode == ModeOptionsNoLink;
+                bool side = key == KeymapKeyLeft || key == KeymapKeyRight;
+                if(!on_the_options || !side || event != KeymapEventShort) {
+                    if(event == KeymapEventShort || event == KeymapEventLong) {
+                        keymap_handle(keymap, key, KeymapEventPress);
+                    }
+                    keymap_handle(keymap, key, event);
+                    assert(keymap_vibration(keymap));
+                }
+                keymap_free(keymap);
+            }
+        }
+        Keymap* keymap = allocs[i]();
+        keymap_set_connected(keymap, false);
+        assert(keymap_vibration(keymap));
+        keymap_set_connected(keymap, true);
+        assert(keymap_vibration(keymap));
+        keymap_time_out(keymap);
+        assert(keymap_vibration(keymap));
+        keymap_free(keymap);
+    }
+}
+
+static void test_vibration_outlasts_the_options(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    keymap_test_tap(keymap, KeymapKeyRight);
+    keymap_test_tap(keymap, KeymapKeyBack);
+    assert(keymap_mode(keymap) == ModeIdle);
+    assert(!keymap_vibration(keymap));
+    assert(keymap_test_tap(keymap, KeymapKeyUp) == ActionArrowUp);
+    assert(!keymap_vibration(keymap));
+    keymap_set_connected(keymap, false);
+    assert(!keymap_vibration(keymap));
+    keymap_time_out(keymap);
+    assert(keymap_mode(keymap) == ModeStopped);
+    assert(!keymap_vibration(keymap));
+    keymap_handle(keymap, KeymapKeyUp, KeymapEventPress);
+    keymap_set_connected(keymap, true);
+    assert(!keymap_vibration(keymap));
+    keymap_test_tap(keymap, KeymapKeyBack);
+    assert(keymap_mode(keymap) == ModeOptions);
+    assert(!keymap_vibration(keymap));
+    keymap_free(keymap);
+}
+
+static void test_link_moves_the_options_between_their_modes(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    assert(keymap_set_connected(keymap, false) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptionsNoLink);
+    assert(keymap_set_connected(keymap, false) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptionsNoLink);
+    assert(keymap_set_connected(keymap, true) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    assert(keymap_set_connected(keymap, true) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    keymap_free(keymap);
+}
+
+static void test_tap_through_a_drop_on_the_options_does_nothing(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    keymap_handle(keymap, KeymapKeyRight, KeymapEventPress);
+    keymap_set_connected(keymap, false);
+    assert(keymap_handle(keymap, KeymapKeyRight, KeymapEventShort) == ActionNone);
+    assert(keymap_vibration(keymap));
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_set_connected(keymap, true);
+    assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventShort) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    keymap_free(keymap);
+}
+
+static void test_wait_ends_the_options_with_give_up(void) {
+    Keymap* keymap = keymap_test_alloc_options();
+    assert(keymap_wait_ms(keymap) == 0);
+    assert(keymap_time_out(keymap) == ActionNone);
+    assert(keymap_mode(keymap) == ModeOptions);
+    keymap_set_connected(keymap, false);
+    assert(keymap_wait_ms(keymap) == 60000);
+    assert(keymap_time_out(keymap) == ActionGiveUp);
+    assert(keymap_mode(keymap) == ModeStopped);
+    keymap_free(keymap);
+}
+
+static void test_options_keep_the_wait_but_for_the_link(void) {
+    Keymap* keymap = keymap_test_alloc_connected();
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventShort);
+    assert(keymap_wait(keymap) == KeymapWaitKeep);
+    keymap_test_tap(keymap, KeymapKeyRight);
+    assert(keymap_wait(keymap) == KeymapWaitKeep);
+    keymap_set_connected(keymap, false);
+    assert(keymap_wait(keymap) == KeymapWaitStart);
+    keymap_test_tap(keymap, KeymapKeyLeft);
+    assert(keymap_wait(keymap) == KeymapWaitKeep);
+    keymap_set_connected(keymap, true);
+    assert(keymap_wait(keymap) == KeymapWaitStop);
+    keymap_set_connected(keymap, false);
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventShort);
+    assert(keymap_mode(keymap) == ModeNoLink);
+    assert(keymap_wait(keymap) == KeymapWaitKeep);
+    keymap_free(keymap);
+
+    keymap = keymap_test_alloc_options();
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
+    keymap_handle(keymap, KeymapKeyBack, KeymapEventShort);
+    assert(keymap_mode(keymap) == ModeIdle);
+    assert(keymap_wait(keymap) == KeymapWaitKeep);
+    keymap_free(keymap);
+}
+
 int main(void) {
     test_run(test_tap_acts);
-    test_run(test_tap_on_back_does_nothing);
+    test_run(test_tap_on_back_opens_the_options);
     test_run(test_hold_acts);
     test_run(test_press_never_acts);
     test_run(test_repeat_never_acts);
@@ -823,5 +1067,17 @@ int main(void) {
     test_run(test_started_over_on_a_cable_sends_nothing);
     test_run(test_tap_through_link_return_does_nothing);
     test_run(test_back_held_through_drop_exits);
+    test_run(test_tap_on_back_closes_the_options);
+    test_run(test_tap_on_back_opens_nothing_elsewhere);
+    test_run(test_back_tap_begun_elsewhere_opens_nothing);
+    test_run(test_options_act_only_on_held_back);
+    test_run(test_fresh_keymap_vibrates);
+    test_run(test_side_tap_on_the_options_switches_vibration);
+    test_run(test_nothing_else_switches_vibration);
+    test_run(test_vibration_outlasts_the_options);
+    test_run(test_link_moves_the_options_between_their_modes);
+    test_run(test_tap_through_a_drop_on_the_options_does_nothing);
+    test_run(test_wait_ends_the_options_with_give_up);
+    test_run(test_options_keep_the_wait_but_for_the_link);
     return 0;
 }

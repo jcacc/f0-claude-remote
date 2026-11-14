@@ -32,8 +32,8 @@ so voice and one hand run the whole session, by feel.
   hold a button for `/clear` or the effort level,
   whatever the Mac's keyboard layout, and the draft stays.
 - **Feedback** —
-  each action confirms itself with a buzz,
-  so no buzz means nothing was sent.
+  each action buzzes and flashes;
+  a tap on Back opens the options, where the buzz turns off.
 - **The dolphin** —
   a dictation earns it 1 XP and a `/clear` 10.
 - **Bluetooth** —

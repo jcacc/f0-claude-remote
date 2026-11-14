@@ -37,7 +37,7 @@ static void app_perform(App* app, Action action) {
     if(deed != DeedNone) {
         dolphin_deed(app_dolphin_deeds[deed]);
     }
-    if(feedback_vibrates(action)) {
+    if(feedback_vibrates(action, keymap_vibration(app->keymap))) {
         notification_message(app->notification, &sequence_single_vibro);
     }
     uint32_t flash_ms = feedback_flash_ms(action);
@@ -67,6 +67,7 @@ static void app_follow_wait(App* app) {
 static void app_settle(App* app, Action action) {
     screen_set_mode(app->screen, keymap_mode(app->keymap));
     screen_set_link(app->screen, keymap_link(app->keymap));
+    screen_set_vibration(app->screen, keymap_vibration(app->keymap));
     transport_hid_set_link(app->transport, keymap_link(app->keymap));
     if(action != ActionNone) {
         app_perform(app, action);
@@ -119,7 +120,11 @@ App* app_alloc(void) {
     app->keymap = keymap_alloc();
     app->backlight = backlight_alloc(display_lit(keymap_mode(app->keymap)));
     app->screen = screen_alloc(
-        app->event_loop, app->input_queue, keymap_mode(app->keymap), keymap_link(app->keymap));
+        app->event_loop,
+        app->input_queue,
+        keymap_mode(app->keymap),
+        keymap_link(app->keymap),
+        keymap_vibration(app->keymap));
     app->transport = transport_hid_alloc(app->link_queue, keymap_link(app->keymap));
     app_follow_wait(app);
     return app;

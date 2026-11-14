@@ -31,6 +31,8 @@ and the platform supplies it, as `transport_hid.c` does.
 | `src/core/transport.h` | Names what the core needs of a link |
 | `src/ui/view.h`, `src/ui/view.c` | Draws a mode's board |
 | `src/ui/view_idle.h`, `src/ui/view_idle.c` | Draws the idle board's buttons |
+| `src/ui/view_options.h`, `src/ui/view_options.c` | Draws the options board's controls |
+| `src/ui/view_plate.h`, `src/ui/view_plate.c` | Draws the parts of a plate |
 | `src/platform/main.c` | Hands the firmware's entry point to `app` |
 | `src/platform/app.h`, `src/platform/app.c` | Runs the application's event loop |
 | `src/platform/backlight.h`, `src/platform/backlight.c` | Holds the display lit while asked to |
@@ -51,10 +53,10 @@ and the platform supplies it, as `transport_hid.c` does.
 6. `transport_hid.c`: turns each key into its code, for the link in use.
 7. `transport_bluetooth.c` or `transport_usb.c`: puts the code into the link's report.
 
-Before step 5, `app.c` hands `screen.c` the mode and the link `keymap.c` holds,
+Before step 5, `app.c` hands `screen.c` the mode, the link and Vibration `keymap.c` holds,
 then `transport_hid.c` that link, which switches to it unless it is the one in use.
 After step 7, it hands the firmware's dolphin the deed `deed.c` names,
-buzzes as `feedback.c` says, and has `screen.c` flash.
+buzzes as `feedback.c` says of the action and Vibration, and has `screen.c` flash.
 
 The link takes the other queue:
 `transport_bluetooth.c`'s status callback, on the Bt thread,
@@ -68,4 +70,4 @@ and `app.c` has `backlight.c` go dark, as `display.c` says of the new mode.
 
 The queues exist because every function of an event loop must be called from the thread that made it
 (documented: [`event_loop.h`](https://github.com/flipperdevices/flipperzero-firmware/blob/1.5.1/furi/core/event_loop.h#L15)).
-The draw callback, on the GUI thread, reads the mode, the link and the flash as three `_Atomic` words.
+The draw callback, on the GUI thread, reads the mode, the link, the flash and Vibration as four `_Atomic` words.

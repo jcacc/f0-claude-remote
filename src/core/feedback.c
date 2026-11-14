@@ -1,6 +1,6 @@
 #include "feedback.h"
 
-bool feedback_vibrates(Action action) {
+bool feedback_vibrates(Action action, bool vibration) {
     switch(action) {
     case ActionEnter:
     case ActionArrowUp:
@@ -12,7 +12,7 @@ bool feedback_vibrates(Action action) {
     case ActionEffortMax:
     case ActionClear:
     case ActionVoiceStart:
-        return true;
+        return vibration;
     case ActionNone:
     case ActionVoiceStop:
     case ActionExit:

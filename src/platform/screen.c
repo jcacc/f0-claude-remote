@@ -12,11 +12,12 @@ struct Screen {
     _Atomic Mode mode;
     _Atomic Link link;
     _Atomic Action flash;
+    _Atomic bool vibration;
 };
 
 static void screen_draw_callback(Canvas* canvas, void* context) {
     Screen* screen = context;
-    view_draw(canvas, screen->mode, screen->link, screen->flash);
+    view_draw(canvas, screen->mode, screen->link, screen->flash, screen->vibration);
 }
 
 /* Runs on the GUI thread, and event_loop.h binds its functions to the loop's own thread. */
@@ -31,12 +32,17 @@ static void screen_flash_callback(void* context) {
     view_port_update(screen->view_port);
 }
 
-Screen*
-    screen_alloc(FuriEventLoop* event_loop, FuriMessageQueue* input_queue, Mode mode, Link link) {
+Screen* screen_alloc(
+    FuriEventLoop* event_loop,
+    FuriMessageQueue* input_queue,
+    Mode mode,
+    Link link,
+    bool vibration) {
     Screen* screen = malloc(sizeof(Screen));
     screen->mode = mode;
     screen->link = link;
     screen->flash = ActionNone;
+    screen->vibration = vibration;
     screen->flash_timer = furi_event_loop_timer_alloc(
         event_loop, screen_flash_callback, FuriEventLoopTimerTypeOnce, screen);
 
@@ -64,6 +70,11 @@ void screen_set_mode(Screen* screen, Mode mode) {
 
 void screen_set_link(Screen* screen, Link link) {
     screen->link = link;
+    view_port_update(screen->view_port);
+}
+
+void screen_set_vibration(Screen* screen, bool vibration) {
+    screen->vibration = vibration;
     view_port_update(screen->view_port);
 }
 

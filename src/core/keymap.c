@@ -12,6 +12,7 @@ struct Keymap {
     bool pressed[KeymapKeyMAX];
     Link link;
     KeymapWait wait;
+    bool vibration;
 };
 
 static const Action keymap_actions[KeymapKeyMAX][KeymapEventMAX] = {
@@ -32,9 +33,11 @@ static uint32_t keymap_mode_wait_ms(Mode mode) {
     switch(mode) {
     case ModeNoLink:
     case ModeVoiceCut:
+    case ModeOptionsNoLink:
         return keymap_link_wait_ms;
     case ModeIdle:
     case ModeVoice:
+    case ModeOptions:
     case ModeStopped:
         break;
     }
@@ -71,12 +74,22 @@ static void keymap_set_mode(Keymap* keymap, Mode mode) {
     keymap_set_screen(keymap, mode, keymap->link);
 }
 
+/* Vibration has two values, so Left and Right both give it the other. */
+static void keymap_tap_options(Keymap* keymap, KeymapKey key, Mode closed) {
+    if(key == KeymapKeyBack) {
+        keymap_set_mode(keymap, closed);
+    } else if(key == KeymapKeyLeft || key == KeymapKeyRight) {
+        keymap->vibration = !keymap->vibration;
+    }
+}
+
 Keymap* keymap_alloc(void) {
     Keymap* keymap = malloc(sizeof(Keymap));
     keymap->mode = ModeNoLink;
     keymap_forget_presses(keymap);
     keymap->link = LinkBluetooth;
     keymap->wait = KeymapWaitStart;
+    keymap->vibration = true;
     return keymap;
 }
 
@@ -109,6 +122,8 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
     case ModeIdle:
         if(action == ActionVoiceStart) {
             keymap_set_mode(keymap, ModeVoice);
+        } else if(key == KeymapKeyBack && event == KeymapEventShort) {
+            keymap_set_mode(keymap, ModeOptions);
         }
         return action;
     case ModeVoice:
@@ -117,6 +132,11 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
         }
         keymap_set_mode(keymap, ModeIdle);
         return ActionVoiceStop;
+    case ModeOptions:
+        if(event == KeymapEventShort) {
+            keymap_tap_options(keymap, key, ModeIdle);
+        }
+        break;
     case ModeVoiceCut:
         if(ok_released) {
             keymap_set_mode(keymap, ModeNoLink);
@@ -125,6 +145,11 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
     case ModeNoLink:
         if(key == KeymapKeyRight && event == KeymapEventLong) {
             keymap_set_screen(keymap, ModeNoLink, keymap_other_links[keymap->link]);
+        }
+        break;
+    case ModeOptionsNoLink:
+        if(event == KeymapEventShort) {
+            keymap_tap_options(keymap, key, ModeNoLink);
         }
         break;
     case ModeStopped:
@@ -158,10 +183,20 @@ Action keymap_set_connected(Keymap* keymap, bool connected) {
             return ActionVoiceStop;
         }
         break;
+    case ModeOptions:
+        if(!connected) {
+            keymap_set_mode(keymap, ModeOptionsNoLink);
+        }
+        break;
     case ModeNoLink:
     case ModeVoiceCut:
         if(connected) {
             keymap_set_mode(keymap, ModeIdle);
+        }
+        break;
+    case ModeOptionsNoLink:
+        if(connected) {
+            keymap_set_mode(keymap, ModeOptions);
         }
         break;
     case ModeStopped:
@@ -194,4 +229,8 @@ Mode keymap_mode(const Keymap* keymap) {
 
 Link keymap_link(const Keymap* keymap) {
     return keymap->link;
+}
+
+bool keymap_vibration(const Keymap* keymap) {
+    return keymap->vibration;
 }

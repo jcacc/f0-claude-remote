@@ -26,7 +26,7 @@ USB is offered on `No link` alone, as a Mac in range returns by itself within a 
 With no link no key is sent, so Right's hold, Esc with the link up, switches the link there,
 and the long press fires 300 ms after the press
 (firmware 1.5.1's sources: [`input.c`](https://github.com/flipperdevices/flipperzero-firmware/blob/1.5.1/applications/services/input/input.c#L13-L14)),
-so `keymap.c` counts Right's hold, as every tap and hold but Back's,
+so `keymap.c` counts Right's hold, as every tap and hold but Back's hold,
 only from a press made on that same screen.
 
 ## The console

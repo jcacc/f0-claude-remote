@@ -25,10 +25,10 @@ While voice is on, no other button SHALL act, exit included.
 
 ### Requirement: An action confirms itself with one buzz
 Enter, the four arrows, Esc, effort high, effort max, clear and the start of voice
-SHALL each vibrate the device once, for 100 ms.
+SHALL each vibrate the device once, for 100 ms, unless `options`' Vibration is `Off`.
 
 #### Scenario: An action
-- **WHEN** one of them acts
+- **WHEN** one of them acts with Vibration `On`
 - **THEN** the device vibrates once
 
 #### Scenario: The silent rest
@@ -43,14 +43,14 @@ A button SHALL act the same whether or not the backlight is on.
 - **THEN** a frame equals `D_disconnected`
 
 ### Requirement: With no link only holding Back or Right acts
-With no link, holding Back SHALL exit,
+With no link and the options closed, holding Back SHALL exit,
 holding Right on `D_disconnected` or `D_usb_disconnected` SHALL switch the link, as `usb-link` and `bluetooth-link` say,
 and no other press SHALL act, vibrate or flash,
-so a press with no buzz was not sent;
+so, with Vibration `On`, a press with no buzz was not sent;
 `D_stopped` alone answers a press otherwise, as its requirements say.
 
 #### Scenario: Every other press
-- **WHEN** the link is offered with none up, every button but Back and Right is tapped and held, and Back and Right are tapped
+- **WHEN** the link is offered with none up and the options are closed, every button but Back and Right is tapped and held, and Back and Right are tapped
 - **THEN** nothing acts, the device does not vibrate and the screen does not change
 
 #### Scenario: Exit
@@ -120,7 +120,7 @@ A tap, or a hold other than Back's, SHALL act only if the screen, a flash aside,
 - **THEN** the application ends
 
 ### Requirement: Each button acts on a tap or a hold
-With the link up, a tap, released before the device's long press fires, and a hold, kept until it fires,
+With the link up and the options closed, a tap, released before the device's long press fires, and a hold, kept until it fires,
 SHALL take the actions in the scenarios below, once each, as far as `A tap or hold acts on the screen it began on` allows,
 and nothing else SHALL act.
 
@@ -142,4 +142,4 @@ and nothing else SHALL act.
 
 #### Scenario: A tap with no action
 - **WHEN** Back is tapped
-- **THEN** nothing acts
+- **THEN** nothing acts, and the options open, as `options` says

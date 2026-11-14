@@ -4,8 +4,10 @@
 static void test_lit_while_the_link_is_held_or_offered(void) {
     assert(display_lit(ModeIdle));
     assert(display_lit(ModeVoice));
+    assert(display_lit(ModeOptions));
     assert(display_lit(ModeNoLink));
     assert(display_lit(ModeVoiceCut));
+    assert(display_lit(ModeOptionsNoLink));
 }
 
 static void test_dark_once_the_offer_stops(void) {

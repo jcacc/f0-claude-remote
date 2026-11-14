@@ -23,10 +23,10 @@ A tap is released before the device's long press fires, and a hold is kept until
 | Up, hold | Ctrl+X, Ctrl+F | Sets effort to `high` |
 | Down, hold | Ctrl+X, Ctrl+X | Sets effort to `max` |
 | Left, hold | Ctrl+X, Ctrl+L | Runs `/clear` |
+| Back, tap | Nothing | Opens the options on the device |
 | Back, hold | Nothing | Leaves the app on the device |
 
 A hold acts once, however long the button stays down.
-Tapping Back does nothing.
 On an empty prompt the left arrow sends the session to the background and opens agent view:
 Esc returns, and `leftArrowOpensAgents` in `/config` turns that off.
 
@@ -41,7 +41,8 @@ which lists the previous conversation.
 Each action that sends buzzes once,
 and its part of the ring on the screen flashes:
 400 ms, or 100 ms for the arrows.
-Stopping dictation, leaving the app and switching the link do not buzz.
+Stopping dictation, leaving the app, switching the link and a tap on Back do not buzz.
+With Vibration `Off` in the options nothing buzzes, and the flash alone confirms.
 The buzz means sent, not applied:
 with another window focused it comes all the same.
 
@@ -53,6 +54,17 @@ with another window focused it comes all the same.
 An action taken by a press stands in a thin frame,
 and one taken by a hold on a black plate,
 as the legend `HOLD` and `TAP` in the top row says.
+
+![The options](../assets/screenshot/options-bt.png)
+
+**`Options`** open with a tap on Back from the main screen, where a gear ends Back's plate.
+`Vibration` is `On` at each launch,
+and a tap on Left or Right turns it `Off` or `On` at once, without a buzz.
+With it `Off` no action buzzes, and each still acts and flashes.
+A tap on Back returns to the main screen, holding it leaves the app,
+and no other button acts there.
+A lost link shows its mark in the top row and leaves the options open,
+and a tap on Back then shows `No link`.
 
 ![Listening](../assets/screenshot/voice-bt.png)
 
