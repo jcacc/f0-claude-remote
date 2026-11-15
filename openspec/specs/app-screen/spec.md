@@ -25,11 +25,11 @@ with no menu first and no system status bar.
 The idle screen, with the link up, voice off and no flash running, SHALL show a status row above a ring of the device's buttons,
 with a thin frame on every action taken by a press,
 a black plate on every held one,
-and a legend saying so.
+and, until a button is pressed on it, a legend saying so.
 The ring and Back's plate SHALL stand in one outline, shaped as the recess the device's case has around its buttons.
 
 #### Scenario: Status row
-- **WHEN** the screen is idle
+- **WHEN** the screen is idle, before a press on it
 - **THEN** the top row reads, left to right,
   a Bluetooth mark, `Connected`, and a legend of `HOLD` joined to `TAP`,
   above a line across the display
@@ -51,12 +51,12 @@ The ring and Back's plate SHALL stand in one outline, shaped as the recess the d
   and no line of it inside a plate
 
 #### Scenario: Hold and press read apart
-- **WHEN** the screen is idle
+- **WHEN** the screen is idle, before a press on it
 - **THEN** `HOLD`, `/effort high`, `/effort max`, the microphone, `/clear`, `Esc`, `exit` and the Back mark stand white on a black plate,
   and `TAP`, the four arrows and the Enter arrow stand black in a thin frame
 
 #### Scenario: The board
-- **WHEN** the link comes up with voice off and no flash running
+- **WHEN** the link comes up with voice off and no flash running, before a press on the idle screen
 - **THEN** a frame read off the device equals board `D_Main`
 
 #### Scenario: Nothing clipped
@@ -273,3 +273,22 @@ the cursor's row in a frame with its value between two arrows.
 #### Scenario: No link
 - **WHEN** the link drops on `E_options_vibration_on`
 - **THEN** a frame equals `E_options_no_link`
+
+### Requirement: The battery takes the legend's place
+From the first press on the idle screen until the application ends,
+its status row SHALL end in the battery the firmware's status bar draws, at the same place:
+its bar as long as the charge, and its lightning while the device charges.
+`D_Main`, `D_usb_main` and each `D_sent_*` SHALL then show it there.
+
+#### Scenario: The first press
+- **WHEN** Back is tapped on `D_Main`, then on the options
+- **THEN** a frame equals, in x 99..124 of rows 1..10, the desktop's read before the launch at the same charge,
+  elsewhere `D_Main` with the legend's place clear
+
+#### Scenario: The charge
+- **WHEN** the battery shows and the charge is read
+- **THEN** the bar is as wide as it gives, changed since the press or not
+
+#### Scenario: The lightning
+- **WHEN** the device charges below full, plugged in before the launch or after it
+- **THEN** the battery shows the lightning as the desktop does

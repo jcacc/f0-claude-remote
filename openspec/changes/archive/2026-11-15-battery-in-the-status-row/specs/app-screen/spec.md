@@ -48,15 +48,19 @@ The ring and Back's plate SHALL stand in one outline, shaped as the recess the d
 
 ### Requirement: The battery takes the legend's place
 From the first press on the idle screen until the application ends,
-its status row SHALL end in a battery in the legend's place:
-a frame with a contact on its right,
-and in it a bar of as many of 8 cells as the device's charge is of full, a part of a cell counting as one.
-From then on a frame that showed `D_Main`, `D_usb_main` or a `D_sent_*` SHALL show it with the battery in the legend's place.
+its status row SHALL end in the battery the firmware's status bar draws, at the same place:
+its bar as long as the charge, and its lightning while the device charges.
+`D_Main`, `D_usb_main` and each `D_sent_*` SHALL then show it there.
 
 #### Scenario: The first press
-- **WHEN** Back is tapped on `D_Main`, and again on the options
-- **THEN** a frame equals `D_idea_status` above the line and `D_Main` from it down, the bar as wide as the charge gives
+- **WHEN** Back is tapped on `D_Main`, then on the options
+- **THEN** a frame equals, in x 99..124 of rows 1..10, the desktop's read before the launch at the same charge,
+  elsewhere `D_Main` with the legend's place clear
 
 #### Scenario: The charge
-- **WHEN** the battery shows, and the charge the device reports is read
-- **THEN** the bar is as wide as that charge gives, whether or not it changed since the press
+- **WHEN** the battery shows and the charge is read
+- **THEN** the bar is as wide as it gives, changed since the press or not
+
+#### Scenario: The lightning
+- **WHEN** the device charges below full, plugged in before the launch or after it
+- **THEN** the battery shows the lightning as the desktop does

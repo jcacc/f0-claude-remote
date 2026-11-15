@@ -54,6 +54,8 @@ with another window focused it comes all the same.
 An action taken by a press stands in a thin frame,
 and one taken by a hold on a black plate,
 as the legend `HOLD` and `TAP` in the top row says.
+The first press there takes the legend away until the app is left,
+and the battery stands in its place as the device's status bar draws it, the lightning included.
 
 ![The options](../assets/screenshot/options-bt.png)
 

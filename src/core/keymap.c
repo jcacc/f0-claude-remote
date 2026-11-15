@@ -11,6 +11,7 @@ struct Keymap {
     Mode mode;
     bool pressed[KeymapKeyMAX];
     Link link;
+    bool legend;
     KeymapWait wait;
     bool options[OptionMAX];
     Option cursor;
@@ -96,6 +97,7 @@ Keymap* keymap_alloc(void) {
     keymap->mode = ModeNoLink;
     keymap_forget_presses(keymap);
     keymap->link = LinkBluetooth;
+    keymap->legend = true;
     keymap->wait = KeymapWaitStart;
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         keymap->options[option] = true;
@@ -131,6 +133,9 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
 
     switch(keymap->mode) {
     case ModeIdle:
+        if(event == KeymapEventPress) {
+            keymap->legend = false;
+        }
         if(action == ActionVoiceStart) {
             keymap_set_mode(keymap, ModeVoice);
         } else if(key == KeymapKeyBack && event == KeymapEventShort) {
@@ -244,6 +249,10 @@ Mode keymap_mode(const Keymap* keymap) {
 
 Link keymap_link(const Keymap* keymap) {
     return keymap->link;
+}
+
+bool keymap_legend(const Keymap* keymap) {
+    return keymap->legend;
 }
 
 bool keymap_option(const Keymap* keymap, Option option) {

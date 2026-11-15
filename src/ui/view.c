@@ -89,11 +89,14 @@ void view_draw(
     Link link,
     Action flash,
     const bool options[OptionMAX],
-    Option cursor) {
+    Option cursor,
+    bool legend,
+    uint8_t charge,
+    bool charging) {
     switch(mode) {
     case ModeIdle:
         view_draw_title_row(canvas, view_links[link].mark, "Connected");
-        view_idle_draw(canvas, flash);
+        view_idle_draw(canvas, flash, legend, charge, charging);
         break;
     case ModeVoice:
         view_draw_voice(canvas, link);

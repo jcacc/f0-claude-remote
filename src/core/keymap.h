@@ -55,6 +55,8 @@ Mode keymap_mode(const Keymap* keymap);
 
 Link keymap_link(const Keymap* keymap);
 
+bool keymap_legend(const Keymap* keymap);
+
 bool keymap_option(const Keymap* keymap, Option option);
 
 Option keymap_cursor(const Keymap* keymap);

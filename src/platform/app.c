@@ -9,6 +9,7 @@
 #include "../core/display.h"
 #include "../core/feedback.h"
 #include "backlight.h"
+#include "battery.h"
 #include "keymap_input.h"
 #include "options_file.h"
 #include "screen.h"
@@ -18,9 +19,12 @@ struct App {
     FuriEventLoop* event_loop;
     FuriMessageQueue* input_queue;
     FuriMessageQueue* link_queue;
+    FuriMessageQueue* charge_queue;
+    FuriMessageQueue* charging_queue;
     FuriEventLoopTimer* wait_timer;
     NotificationApp* notification;
     Backlight* backlight;
+    Battery* battery;
     Keymap* keymap;
     OptionsFile* options_file;
     Screen* screen;
@@ -78,6 +82,7 @@ static void app_follow_options(App* app) {
 static void app_settle(App* app, Action action) {
     screen_set_mode(app->screen, keymap_mode(app->keymap));
     screen_set_link(app->screen, keymap_link(app->keymap));
+    screen_set_legend(app->screen, keymap_legend(app->keymap));
     app_follow_options(app);
     transport_hid_set_link(app->transport, keymap_link(app->keymap));
     if(action != ActionNone) {
@@ -105,6 +110,22 @@ static void app_link_callback(FuriEventLoopObject* object, void* context) {
     app_settle(app, keymap_set_connected(app->keymap, connected));
 }
 
+static void app_charge_callback(FuriEventLoopObject* object, void* context) {
+    App* app = context;
+    uint8_t charge;
+    furi_check(furi_message_queue_get(object, &charge, 0) == FuriStatusOk);
+
+    screen_set_charge(app->screen, charge);
+}
+
+static void app_charging_callback(FuriEventLoopObject* object, void* context) {
+    App* app = context;
+    bool charging;
+    furi_check(furi_message_queue_get(object, &charging, 0) == FuriStatusOk);
+
+    screen_set_charging(app->screen, charging);
+}
+
 static void app_wait_callback(void* context) {
     App* app = context;
     app_settle(app, keymap_time_out(app->keymap));
@@ -127,6 +148,12 @@ App* app_alloc(void) {
     app->link_queue = furi_message_queue_alloc(8, sizeof(bool));
     furi_event_loop_subscribe_message_queue(
         app->event_loop, app->link_queue, FuriEventLoopEventIn, app_link_callback, app);
+    app->charge_queue = furi_message_queue_alloc(8, sizeof(uint8_t));
+    furi_event_loop_subscribe_message_queue(
+        app->event_loop, app->charge_queue, FuriEventLoopEventIn, app_charge_callback, app);
+    app->charging_queue = furi_message_queue_alloc(8, sizeof(bool));
+    furi_event_loop_subscribe_message_queue(
+        app->event_loop, app->charging_queue, FuriEventLoopEventIn, app_charging_callback, app);
     app->wait_timer = furi_event_loop_timer_alloc(
         app->event_loop, app_wait_callback, FuriEventLoopTimerTypeOnce, app);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -140,8 +167,15 @@ App* app_alloc(void) {
     app->backlight = backlight_alloc(
         display_light(keymap_mode(app->keymap), keymap_option(app->keymap, OptionBacklight)));
     app->screen = screen_alloc(
-        app->event_loop, app->input_queue, keymap_mode(app->keymap), keymap_link(app->keymap));
+        app->event_loop,
+        app->input_queue,
+        keymap_mode(app->keymap),
+        keymap_link(app->keymap),
+        keymap_legend(app->keymap));
     app_follow_options(app);
+    /* Ahead of the transport: the loop serves the first reading before any link report
+     * (event_loop.c:149, :552), so before the idle screen. */
+    app->battery = battery_alloc(app->charge_queue, app->charging_queue);
     app->transport = transport_hid_alloc(app->link_queue, keymap_link(app->keymap));
     app_follow_wait(app);
     return app;
@@ -150,11 +184,16 @@ App* app_alloc(void) {
 void app_free(App* app) {
     screen_free(app->screen);
     transport_hid_free(app->transport);
+    battery_free(app->battery);
     options_file_free(app->options_file);
     keymap_free(app->keymap);
     backlight_free(app->backlight);
     furi_record_close(RECORD_NOTIFICATION);
     furi_event_loop_timer_free(app->wait_timer);
+    furi_event_loop_unsubscribe(app->event_loop, app->charging_queue);
+    furi_message_queue_free(app->charging_queue);
+    furi_event_loop_unsubscribe(app->event_loop, app->charge_queue);
+    furi_message_queue_free(app->charge_queue);
     furi_event_loop_unsubscribe(app->event_loop, app->link_queue);
     furi_message_queue_free(app->link_queue);
     furi_event_loop_unsubscribe(app->event_loop, app->input_queue);

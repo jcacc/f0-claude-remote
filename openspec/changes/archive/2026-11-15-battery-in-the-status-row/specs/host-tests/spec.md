@@ -35,13 +35,30 @@ and every cell from a full charge on.
 A suite of its own SHALL pin it, and the UI SHALL size the bar by that answer alone.
 
 #### Scenario: Rounded up
-- **WHEN** the core is asked how many of 8 cells a charge of 1, 12, 13, 75, 76 or 87 % fills
-- **THEN** it answers 1, 1, 2, 6, 7 and 7
+- **WHEN** the core is asked how many of 20 cells a charge of 1, 5, 6, 94 or 95 % fills
+- **THEN** it answers 1, 1, 2, 19 and 19
 
 #### Scenario: Empty and full
-- **WHEN** the charge is 0 %, 88 %, 100 %, or a reading past 100
-- **THEN** it answers no cell for the first, and all 8 for each of the others
+- **WHEN** the charge is 0 %, 96 %, 100 %, or a reading past 100
+- **THEN** it answers no cell for the first, and all 20 for each of the others
 
 #### Scenario: By that answer alone
 - **WHEN** `git grep -n 'charge_cells' -- src/ui src/platform` runs
 - **THEN** it prints one line of `view_idle.c`
+
+### Requirement: The core decides when the lightning shows at the opening
+Whether `app-screen`'s battery opens with its lightning SHALL be decided in `src/core/`:
+while the device charges, below a full charge, before the charger is done.
+A suite of its own SHALL pin it, and the platform SHALL open the battery by that answer alone.
+
+#### Scenario: Charging
+- **WHEN** the device charges at 0 or 99 %, the charger not done
+- **THEN** the core answers the lightning
+
+#### Scenario: Not charging
+- **WHEN** the device does not charge, charges at 100 %, or the charger is done
+- **THEN** the core answers none
+
+#### Scenario: By the opening's answer alone
+- **WHEN** `git grep -n 'charging_now' -- src/ui src/platform` runs
+- **THEN** it prints one line of `battery.c`

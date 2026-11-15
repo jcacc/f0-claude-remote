@@ -1113,6 +1113,89 @@ static void test_options_keep_the_wait_but_for_the_link(void) {
     keymap_free(keymap);
 }
 
+static void test_fresh_keymap_shows_the_legend(void) {
+    Keymap* (*const allocs[])(void) = {keymap_alloc, keymap_test_alloc_on_usb};
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        Keymap* keymap = allocs[i]();
+        assert(keymap_legend(keymap));
+        keymap_set_connected(keymap, true);
+        assert(keymap_mode(keymap) == ModeIdle);
+        assert(keymap_legend(keymap));
+        keymap_free(keymap);
+    }
+}
+
+static void test_press_on_the_main_screen_ends_the_legend(void) {
+    Keymap* (*const allocs[])(void) = {keymap_alloc, keymap_test_alloc_on_usb};
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        for(KeymapKey key = KeymapKeyUp; key < KeymapKeyMAX; key++) {
+            Keymap* keymap = allocs[i]();
+            keymap_set_connected(keymap, true);
+            keymap_handle(keymap, key, KeymapEventPress);
+            assert(!keymap_legend(keymap));
+            keymap_free(keymap);
+        }
+    }
+}
+
+static void test_nothing_else_ends_the_legend(void) {
+    Keymap* (*const allocs[])(void) = {
+        keymap_alloc,
+        keymap_test_alloc_on_usb,
+        keymap_test_alloc_stopped,
+    };
+    for(size_t i = 0; i < sizeof(allocs) / sizeof(allocs[0]); i++) {
+        for(KeymapKey key = KeymapKeyUp; key < KeymapKeyMAX; key++) {
+            for(KeymapEvent event = KeymapEventPress; event < KeymapEventMAX; event++) {
+                Keymap* keymap = allocs[i]();
+                keymap_handle(keymap, key, KeymapEventPress);
+                keymap_handle(keymap, key, event);
+                assert(keymap_legend(keymap));
+                keymap_free(keymap);
+            }
+        }
+        Keymap* keymap = allocs[i]();
+        keymap_set_connected(keymap, false);
+        keymap_time_out(keymap);
+        assert(keymap_legend(keymap));
+        keymap_free(keymap);
+    }
+
+    for(KeymapKey key = KeymapKeyUp; key < KeymapKeyMAX; key++) {
+        Keymap* keymap = keymap_alloc();
+        keymap_handle(keymap, key, KeymapEventPress);
+        keymap_set_connected(keymap, true);
+        keymap_handle(keymap, key, KeymapEventShort);
+        keymap_handle(keymap, key, KeymapEventRelease);
+        keymap_set_connected(keymap, true);
+        keymap_time_out(keymap);
+        assert(keymap_mode(keymap) == ModeIdle);
+        assert(keymap_legend(keymap));
+        keymap_free(keymap);
+    }
+}
+
+static void test_legend_stays_away(void) {
+    Keymap* keymap = keymap_test_alloc_connected();
+    keymap_test_tap(keymap, KeymapKeyUp);
+    keymap_handle(keymap, KeymapKeyOk, KeymapEventPress);
+    keymap_handle(keymap, KeymapKeyOk, KeymapEventLong);
+    keymap_handle(keymap, KeymapKeyOk, KeymapEventRelease);
+    assert(keymap_mode(keymap) == ModeIdle);
+    assert(!keymap_legend(keymap));
+    keymap_test_tap(keymap, KeymapKeyBack);
+    keymap_test_tap(keymap, KeymapKeyBack);
+    assert(keymap_mode(keymap) == ModeIdle);
+    assert(!keymap_legend(keymap));
+    keymap_set_connected(keymap, false);
+    keymap_time_out(keymap);
+    keymap_handle(keymap, KeymapKeyUp, KeymapEventPress);
+    keymap_set_connected(keymap, true);
+    assert(keymap_mode(keymap) == ModeIdle);
+    assert(!keymap_legend(keymap));
+    keymap_free(keymap);
+}
+
 int main(void) {
     test_run(test_tap_acts);
     test_run(test_tap_on_back_opens_the_options);
@@ -1201,5 +1284,9 @@ int main(void) {
     test_run(test_tap_through_a_drop_on_the_options_does_nothing);
     test_run(test_wait_ends_the_options_with_give_up);
     test_run(test_options_keep_the_wait_but_for_the_link);
+    test_run(test_fresh_keymap_shows_the_legend);
+    test_run(test_press_on_the_main_screen_ends_the_legend);
+    test_run(test_nothing_else_ends_the_legend);
+    test_run(test_legend_stays_away);
     return 0;
 }

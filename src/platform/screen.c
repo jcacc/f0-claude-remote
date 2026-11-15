@@ -11,6 +11,9 @@ struct Screen {
     /* The draw callback reads these on the GUI thread. */
     _Atomic Mode mode;
     _Atomic Link link;
+    _Atomic bool legend;
+    _Atomic uint8_t charge;
+    _Atomic bool charging;
     _Atomic Action flash;
     _Atomic bool options[OptionMAX];
     _Atomic Option cursor;
@@ -22,7 +25,16 @@ static void screen_draw_callback(Canvas* canvas, void* context) {
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         options[option] = screen->options[option];
     }
-    view_draw(canvas, screen->mode, screen->link, screen->flash, options, screen->cursor);
+    view_draw(
+        canvas,
+        screen->mode,
+        screen->link,
+        screen->flash,
+        options,
+        screen->cursor,
+        screen->legend,
+        screen->charge,
+        screen->charging);
 }
 
 /* Runs on the GUI thread, and event_loop.h binds its functions to the loop's own thread. */
@@ -37,11 +49,18 @@ static void screen_flash_callback(void* context) {
     view_port_update(screen->view_port);
 }
 
-Screen*
-    screen_alloc(FuriEventLoop* event_loop, FuriMessageQueue* input_queue, Mode mode, Link link) {
+Screen* screen_alloc(
+    FuriEventLoop* event_loop,
+    FuriMessageQueue* input_queue,
+    Mode mode,
+    Link link,
+    bool legend) {
     Screen* screen = malloc(sizeof(Screen));
     screen->mode = mode;
     screen->link = link;
+    screen->legend = legend;
+    screen->charge = 0;
+    screen->charging = false;
     screen->flash = ActionNone;
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         screen->options[option] = false;
@@ -74,6 +93,21 @@ void screen_set_mode(Screen* screen, Mode mode) {
 
 void screen_set_link(Screen* screen, Link link) {
     screen->link = link;
+    view_port_update(screen->view_port);
+}
+
+void screen_set_legend(Screen* screen, bool legend) {
+    screen->legend = legend;
+    view_port_update(screen->view_port);
+}
+
+void screen_set_charge(Screen* screen, uint8_t charge) {
+    screen->charge = charge;
+    view_port_update(screen->view_port);
+}
+
+void screen_set_charging(Screen* screen, bool charging) {
+    screen->charging = charging;
     view_port_update(screen->view_port);
 }
 

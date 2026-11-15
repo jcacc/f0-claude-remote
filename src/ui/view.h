@@ -13,4 +13,7 @@ void view_draw(
     Link link,
     Action flash,
     const bool options[OptionMAX],
-    Option cursor);
+    Option cursor,
+    bool legend,
+    uint8_t charge,
+    bool charging);

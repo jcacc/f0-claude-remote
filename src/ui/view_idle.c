@@ -2,14 +2,34 @@
 
 #include <f0_claude_remote_icons.h>
 
+#include "../core/charge.h"
 #include "view_plate.h"
 
+static const uint8_t view_idle_battery_cells = 20;
+
 static void view_idle_draw_legend(Canvas* canvas) {
-    canvas_set_font(canvas, FontSecondary);
     view_plate_draw_outline(canvas, 74, 0, 53);
     view_plate_draw_fill(canvas, 74, 0, 30);
     view_plate_draw_white_str(canvas, 77, 9, "HOLD");
     canvas_draw_str(canvas, 106, 9, "TAP");
+}
+
+/* As the firmware's status bar draws it (power.c:17-48); u8g2 draws no box of zero width
+ * (u8g2_box.c:40). */
+static void view_idle_draw_battery(Canvas* canvas, uint8_t charge, bool charging) {
+    canvas_draw_icon(canvas, 99, 2, &I_battery);
+    uint8_t cells = charge_cells(charge, view_idle_battery_cells);
+    if(cells > 0) {
+        canvas_draw_box(canvas, 101, 4, cells, 4);
+    }
+    if(charging) {
+        canvas_set_bitmap_mode(canvas, true);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_icon(canvas, 107, 1, &I_charging_lightning_mask);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_icon(canvas, 107, 1, &I_charging_lightning);
+        canvas_set_bitmap_mode(canvas, false);
+    }
 }
 
 static void view_idle_draw_ring(Canvas* canvas) {
@@ -97,8 +117,13 @@ static void view_idle_draw_flash(Canvas* canvas, Action flash) {
     canvas_set_color(canvas, ColorBlack);
 }
 
-void view_idle_draw(Canvas* canvas, Action flash) {
-    view_idle_draw_legend(canvas);
+void view_idle_draw(Canvas* canvas, Action flash, bool legend, uint8_t charge, bool charging) {
+    canvas_set_font(canvas, FontSecondary);
+    if(legend) {
+        view_idle_draw_legend(canvas);
+    } else {
+        view_idle_draw_battery(canvas, charge, charging);
+    }
     view_idle_draw_ring(canvas);
     view_idle_draw_ok_button(canvas);
     view_idle_draw_side_actions(canvas);
