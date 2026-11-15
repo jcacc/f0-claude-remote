@@ -2,7 +2,7 @@
 
 #include <f0_claude_remote_icons.h>
 
-#include "view_idle.h"
+#include "view_main.h"
 #include "view_options.h"
 
 typedef struct {
@@ -85,9 +85,9 @@ static void view_draw_stopped(Canvas* canvas, Link link) {
 
 void view_draw(Canvas* canvas, const ViewState* state) {
     switch(state->mode) {
-    case ModeIdle:
+    case ModeMain:
         view_draw_title_row(canvas, view_links[state->link].mark, "Connected");
-        view_idle_draw(canvas, state);
+        view_main_draw(canvas, state);
         break;
     case ModeVoice:
         view_draw_voice(canvas, state->link);

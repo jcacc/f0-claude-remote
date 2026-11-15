@@ -83,7 +83,7 @@ and the platform SHALL light and darken the display by it alone, at the opening 
 naming no action for the light.
 
 #### Scenario: Lit
-- **WHEN** the mode holds the link or offers it: idle, voice, no link, a voice cut by the link, or the options, with a link or with none,
+- **WHEN** the mode holds the link or offers it: main, voice, no link, a voice cut by the link, or the options, with a link or with none,
   and Backlight is `On`
 - **THEN** the core answers that the display is held lit
 
@@ -177,7 +177,7 @@ A suite of its own SHALL pin it, and the UI SHALL size the bar by that answer al
 
 #### Scenario: By that answer alone
 - **WHEN** `git grep -n 'charge_cells' -- src/ui src/platform` runs
-- **THEN** it prints one line of `view_idle.c`
+- **THEN** it prints one line of `view_main.c`
 
 ### Requirement: The core decides when the lightning shows at the opening
 Whether `app-screen`'s battery opens with its lightning SHALL be decided in `src/core/`:

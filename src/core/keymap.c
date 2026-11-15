@@ -42,7 +42,7 @@ static uint32_t keymap_mode_wait_ms(Mode mode) {
     case ModeVoiceCut:
     case ModeOptionsNoLink:
         return keymap_link_wait_ms;
-    case ModeIdle:
+    case ModeMain:
     case ModeVoice:
     case ModeOptions:
     case ModeStopped:
@@ -132,7 +132,7 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
     }
 
     switch(keymap->mode) {
-    case ModeIdle:
+    case ModeMain:
         if(event == KeymapEventPress) {
             keymap->legend = false;
         }
@@ -146,11 +146,11 @@ Action keymap_handle(Keymap* keymap, KeymapKey key, KeymapEvent event) {
         if(!ok_released) {
             return ActionNone;
         }
-        keymap_set_mode(keymap, ModeIdle);
+        keymap_set_mode(keymap, ModeMain);
         return ActionVoiceStop;
     case ModeOptions:
         if(event == KeymapEventShort) {
-            keymap_tap_options(keymap, key, ModeIdle);
+            keymap_tap_options(keymap, key, ModeMain);
         }
         break;
     case ModeVoiceCut:
@@ -188,7 +188,7 @@ Action keymap_set_connected(Keymap* keymap, bool connected) {
     keymap->wait = KeymapWaitKeep;
 
     switch(keymap->mode) {
-    case ModeIdle:
+    case ModeMain:
         if(!connected) {
             keymap_set_mode(keymap, ModeNoLink);
         }
@@ -207,7 +207,7 @@ Action keymap_set_connected(Keymap* keymap, bool connected) {
     case ModeNoLink:
     case ModeVoiceCut:
         if(connected) {
-            keymap_set_mode(keymap, ModeIdle);
+            keymap_set_mode(keymap, ModeMain);
         }
         break;
     case ModeOptionsNoLink:

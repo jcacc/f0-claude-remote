@@ -2,7 +2,7 @@
 
 DisplayLight display_light(Mode mode, bool backlight) {
     switch(mode) {
-    case ModeIdle:
+    case ModeMain:
     case ModeVoice:
     case ModeOptions:
     case ModeNoLink:

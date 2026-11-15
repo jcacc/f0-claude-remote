@@ -34,7 +34,7 @@ and the platform supplies it, as `transport_hid.c` does.
 | `src/core/transport.h` | Names what the core needs of a link |
 | `src/ui/view_state.h` | Names what a frame shows |
 | `src/ui/view.h`, `src/ui/view.c` | Draws a mode's board |
-| `src/ui/view_idle.h`, `src/ui/view_idle.c` | Draws what only the idle board shows |
+| `src/ui/view_main.h`, `src/ui/view_main.c` | Draws what only the main board shows |
 | `src/ui/view_options.h`, `src/ui/view_options.c` | Draws the options board's controls |
 | `src/ui/view_plate.h`, `src/ui/view_plate.c` | Draws the parts of a plate |
 | `src/platform/main.c` | Hands the firmware's entry point to `app` |

@@ -4,4 +4,4 @@
 
 #include "view_state.h"
 
-void view_idle_draw(Canvas* canvas, const ViewState* state);
+void view_main_draw(Canvas* canvas, const ViewState* state);

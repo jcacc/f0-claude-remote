@@ -177,7 +177,7 @@ App* app_alloc(void) {
     app_follow_keymap(app, &state);
     app->screen = screen_alloc(app->event_loop, app->input_queue, &state);
     /* Ahead of the transport: the loop serves the first reading before any link report
-     * (event_loop.c:149, :552), so before the idle screen. */
+     * (event_loop.c:149, :552), so before the main screen. */
     app->battery = battery_alloc(app->charge_queue, app->charging_queue);
     app->transport = transport_hid_alloc(app->link_queue, keymap_link(app->keymap));
     app_follow_wait(app);

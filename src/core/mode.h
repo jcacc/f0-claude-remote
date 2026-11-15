@@ -1,7 +1,7 @@
 #pragma once
 
 typedef enum {
-    ModeIdle,
+    ModeMain,
     ModeVoice,
     ModeOptions,
     ModeNoLink,

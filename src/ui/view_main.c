@@ -1,13 +1,13 @@
-#include "view_idle.h"
+#include "view_main.h"
 
 #include <f0_claude_remote_icons.h>
 
 #include "../core/charge.h"
 #include "view_plate.h"
 
-static const uint8_t view_idle_battery_cells = 20;
+static const uint8_t view_main_battery_cells = 20;
 
-static void view_idle_draw_legend(Canvas* canvas) {
+static void view_main_draw_legend(Canvas* canvas) {
     view_plate_draw_outline(canvas, 74, 0, 53);
     view_plate_draw_fill(canvas, 74, 0, 30);
     view_plate_draw_white_str(canvas, 77, 9, "HOLD");
@@ -16,9 +16,9 @@ static void view_idle_draw_legend(Canvas* canvas) {
 
 /* As the firmware's status bar draws it (power.c:17-48); u8g2 draws no box of zero width
  * (u8g2_box.c:40). */
-static void view_idle_draw_battery(Canvas* canvas, uint8_t charge, bool charging) {
+static void view_main_draw_battery(Canvas* canvas, uint8_t charge, bool charging) {
     canvas_draw_icon(canvas, 99, 2, &I_battery);
-    uint8_t cells = charge_cells(charge, view_idle_battery_cells);
+    uint8_t cells = charge_cells(charge, view_main_battery_cells);
     if(cells > 0) {
         canvas_draw_box(canvas, 101, 4, cells, 4);
     }
@@ -32,7 +32,7 @@ static void view_idle_draw_battery(Canvas* canvas, uint8_t charge, bool charging
     }
 }
 
-static void view_idle_draw_ring(Canvas* canvas) {
+static void view_main_draw_ring(Canvas* canvas) {
     /* Comes first: an icon paints its whole box, the clear cells too. */
     canvas_draw_icon(canvas, 38, 15, &I_recess);
     view_plate_draw_outline(canvas, 3, 14, 65);
@@ -48,7 +48,7 @@ static void view_idle_draw_ring(Canvas* canvas) {
 }
 
 /* The canvas fills no triangle, so both halves of the diagonal go row by row. */
-static void view_idle_draw_ok_button(Canvas* canvas) {
+static void view_main_draw_ok_button(Canvas* canvas) {
     canvas_draw_rframe(canvas, 46, 28, 30, 21, 2);
     for(int32_t y = 29; y <= 47; y++) {
         canvas_draw_line(canvas, 47, y, 101 - y, y);
@@ -57,7 +57,7 @@ static void view_idle_draw_ok_button(Canvas* canvas) {
     canvas_draw_icon(canvas, 64, 39, &I_enter);
 }
 
-static void view_idle_draw_side_actions(Canvas* canvas) {
+static void view_main_draw_side_actions(Canvas* canvas) {
     view_plate_draw_outline(canvas, 3, 33, 40);
     view_plate_draw_fill(canvas, 3, 33, 31);
     view_plate_draw_white_icon(canvas, 6, 35, &I_slash);
@@ -74,7 +74,7 @@ static void view_idle_draw_side_actions(Canvas* canvas) {
     canvas_draw_icon(canvas, 113, 48, &I_options);
 }
 
-static void view_idle_draw_flash(Canvas* canvas, Action flash) {
+static void view_main_draw_flash(Canvas* canvas, Action flash) {
     canvas_set_color(canvas, ColorXOR);
     switch(flash) {
     case ActionArrowUp:
@@ -117,15 +117,15 @@ static void view_idle_draw_flash(Canvas* canvas, Action flash) {
     canvas_set_color(canvas, ColorBlack);
 }
 
-void view_idle_draw(Canvas* canvas, const ViewState* state) {
+void view_main_draw(Canvas* canvas, const ViewState* state) {
     canvas_set_font(canvas, FontSecondary);
     if(state->legend) {
-        view_idle_draw_legend(canvas);
+        view_main_draw_legend(canvas);
     } else {
-        view_idle_draw_battery(canvas, state->charge, state->charging);
+        view_main_draw_battery(canvas, state->charge, state->charging);
     }
-    view_idle_draw_ring(canvas);
-    view_idle_draw_ok_button(canvas);
-    view_idle_draw_side_actions(canvas);
-    view_idle_draw_flash(canvas, state->flash);
+    view_main_draw_ring(canvas);
+    view_main_draw_ok_button(canvas);
+    view_main_draw_side_actions(canvas);
+    view_main_draw_flash(canvas, state->flash);
 }

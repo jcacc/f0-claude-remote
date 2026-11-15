@@ -2,7 +2,7 @@
 #include "test.h"
 
 static const Mode display_test_offering[] = {
-    ModeIdle,
+    ModeMain,
     ModeVoice,
     ModeOptions,
     ModeNoLink,
