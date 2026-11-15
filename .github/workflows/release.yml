@@ -105,6 +105,7 @@ jobs:
             - asset/screenshot/no-link-usb.png
             - asset/screenshot/voice-cut-bt.png
             - asset/screenshot/stopped-bt.png
+            - asset/screenshot/options-bt.png
           EOF
           content=$(base64 -w 0 manifest.yml)
 
