@@ -136,10 +136,7 @@ with the element's frame unchanged.
 ### Requirement: The status follows the link
 The screen SHALL read `Connected` only while the Mac holds the link, which over Bluetooth means paired.
 While the link is offered with none up and the options are closed, it SHALL show `No link` and `Reconnecting...` with no ring,
-and `Keys are not sent` unless a voice was cut;
-`D_disconnected` alone SHALL also show Right's hold for USB, on a black plate reading `Switch to` and the USB mark,
-and a legend of `HOLD` alone, white on a black plate, ending the status row where `D_Main`'s legend ends.
-`D_disc_voice` SHALL show no legend.
+and `Keys are not sent` unless a voice was cut.
 Every no-link board SHALL keep its two lines on the rows of `D_stopped`.
 
 #### Scenario: Opened with no link
@@ -292,3 +289,12 @@ its bar as long as the charge, and its lightning while the device charges.
 #### Scenario: The lightning
 - **WHEN** the device charges below full, plugged in before the launch or after it
 - **THEN** the battery shows the lightning as the desktop does
+
+### Requirement: No link shows Right's hold for USB
+`D_disconnected` alone SHALL show Right's hold for USB, on a black plate reading `Switch to` and the USB mark,
+and a legend of `HOLD` alone, white on a black plate, ending the status row where `D_Main`'s legend ends.
+`D_disc_voice` SHALL show no legend.
+
+#### Scenario: Right's hold for USB
+- **WHEN** the owner looks at `D_disconnected` on the device
+- **THEN** Right's hold shows on a black plate reading `Switch to` and the USB mark
