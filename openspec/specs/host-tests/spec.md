@@ -136,7 +136,7 @@ at the opening as after an event.
   and the two that open the transport and set it after an event
 
 ### Requirement: The core decides when the legend ends
-Whether the idle screen's status row ends in the legend or in the battery of `app-screen`
+Whether the main screen's status row ends in the legend or in the battery of `app-screen`
 SHALL be decided in `src/core/` by the keymap, which answers it after every event.
 The keymap's suite SHALL pin what ends the legend and what leaves it,
 and the platform SHALL show the row's end by that answer alone, at the opening as after an event.
@@ -146,14 +146,14 @@ and the platform SHALL show the row's end by that answer alone, at the opening a
 - **THEN** the core answers the legend
 
 #### Scenario: Ended
-- **WHEN** a button goes down on the idle screen, on either link
+- **WHEN** a button goes down on the main screen, on either link
 - **THEN** the core answers the battery,
   and still does once voice, the options, a lost link or a stopped offer has come and gone
 
 #### Scenario: Left
 - **WHEN** any other event comes before that press:
   a press, tap or hold on a no-link board or on the stopped screen,
-  the release or the tap, on the idle screen, of a button that went down before the link came up,
+  the release or the tap, on the main screen, of a button that went down before the link came up,
   a link report, or the wait's end
 - **THEN** the core answers the legend
 

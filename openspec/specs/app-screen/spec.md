@@ -147,7 +147,7 @@ Every no-link board SHALL keep its two lines on the rows of `D_stopped`.
 - **THEN** a frame read off the device equals board `D_disconnected`
 
 #### Scenario: The link drops
-- **WHEN** the link drops on the idle screen
+- **WHEN** the link drops on the main screen
 - **THEN** a frame equals `D_disconnected`, with no press
 
 #### Scenario: The link drops during a flash
@@ -275,7 +275,7 @@ the cursor's row in a frame with its value between two arrows.
 - **THEN** a frame equals `E_options_no_link`
 
 ### Requirement: The battery takes the legend's place
-From the first press on the idle screen until the application ends,
+From the first press on the main screen until the application ends,
 its status row SHALL end in the battery the firmware's status bar draws, at the same place:
 its bar as long as the charge, and its lightning while the device charges.
 `D_Main`, `D_usb_main` and each `D_sent_*` SHALL then show it there.
