@@ -131,8 +131,9 @@ at the opening as after an event.
 
 #### Scenario: The platform follows
 - **WHEN** `git grep -n 'keymap_link' -- src/platform` runs
-- **THEN** it prints four lines of `app.c`:
-  the two that open the screen and the transport, and the two that set them after an event
+- **THEN** it prints three lines of `app.c`:
+  the one that gives the screen's state the link, at the opening as after an event,
+  and the two that open the transport and set it after an event
 
 ### Requirement: The core decides when the legend ends
 Whether the idle screen's status row ends in the legend or in the battery of `app-screen`
@@ -158,7 +159,7 @@ and the platform SHALL show the row's end by that answer alone, at the opening a
 
 #### Scenario: The platform follows
 - **WHEN** `git grep -n 'keymap_legend' -- src/platform` runs
-- **THEN** it prints two lines of `app.c`: the one that opens the screen, and the one that sets it after an event
+- **THEN** it prints one line of `app.c`, which gives the screen's state the legend, at the opening as after an event
 
 ### Requirement: The core says how many cells a charge fills
 How many cells of `app-screen`'s battery a charge fills SHALL be decided in `src/core/`:

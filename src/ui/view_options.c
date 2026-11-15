@@ -36,11 +36,11 @@ static void view_options_draw_cursor(Canvas* canvas, const ViewOptionsRow* row) 
     canvas_draw_icon(canvas, 120, row->top + 2, &I_right);
 }
 
-void view_options_draw(Canvas* canvas, const bool options[OptionMAX], Option cursor) {
+void view_options_draw(Canvas* canvas, const ViewState* state) {
     canvas_set_font(canvas, FontSecondary);
     view_options_draw_plate(canvas);
     for(Option option = OptionVibration; option < OptionMAX; option++) {
-        view_options_draw_row(canvas, &view_options_rows[option], options[option]);
+        view_options_draw_row(canvas, &view_options_rows[option], state->options[option]);
     }
-    view_options_draw_cursor(canvas, &view_options_rows[cursor]);
+    view_options_draw_cursor(canvas, &view_options_rows[state->cursor]);
 }

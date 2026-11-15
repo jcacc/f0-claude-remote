@@ -69,20 +69,27 @@ static void app_follow_wait(App* app) {
     }
 }
 
+static void app_follow_keymap(App* app, ViewState* state) {
+    state->mode = keymap_mode(app->keymap);
+    state->link = keymap_link(app->keymap);
+    state->legend = keymap_legend(app->keymap);
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        state->options[option] = keymap_option(app->keymap, option);
+    }
+    state->cursor = keymap_cursor(app->keymap);
+}
+
 static void app_follow_options(App* app) {
     for(Option option = OptionVibration; option < OptionMAX; option++) {
-        bool on = keymap_option(app->keymap, option);
-        screen_set_option(app->screen, option, on);
-        options_file_set_option(app->options_file, option, on);
+        options_file_set_option(app->options_file, option, keymap_option(app->keymap, option));
     }
-    screen_set_cursor(app->screen, keymap_cursor(app->keymap));
 }
 
 /* The board goes first: a switch then holds this loop at least 700 ms. */
 static void app_settle(App* app, Action action) {
-    screen_set_mode(app->screen, keymap_mode(app->keymap));
-    screen_set_link(app->screen, keymap_link(app->keymap));
-    screen_set_legend(app->screen, keymap_legend(app->keymap));
+    ViewState state = screen_state(app->screen);
+    app_follow_keymap(app, &state);
+    screen_set_state(app->screen, &state);
     app_follow_options(app);
     transport_hid_set_link(app->transport, keymap_link(app->keymap));
     if(action != ActionNone) {
@@ -112,18 +119,18 @@ static void app_link_callback(FuriEventLoopObject* object, void* context) {
 
 static void app_charge_callback(FuriEventLoopObject* object, void* context) {
     App* app = context;
-    uint8_t charge;
-    furi_check(furi_message_queue_get(object, &charge, 0) == FuriStatusOk);
+    ViewState state = screen_state(app->screen);
+    furi_check(furi_message_queue_get(object, &state.charge, 0) == FuriStatusOk);
 
-    screen_set_charge(app->screen, charge);
+    screen_set_state(app->screen, &state);
 }
 
 static void app_charging_callback(FuriEventLoopObject* object, void* context) {
     App* app = context;
-    bool charging;
-    furi_check(furi_message_queue_get(object, &charging, 0) == FuriStatusOk);
+    ViewState state = screen_state(app->screen);
+    furi_check(furi_message_queue_get(object, &state.charging, 0) == FuriStatusOk);
 
-    screen_set_charging(app->screen, charging);
+    screen_set_state(app->screen, &state);
 }
 
 static void app_wait_callback(void* context) {
@@ -166,13 +173,9 @@ App* app_alloc(void) {
     }
     app->backlight = backlight_alloc(
         display_light(keymap_mode(app->keymap), keymap_option(app->keymap, OptionBacklight)));
-    app->screen = screen_alloc(
-        app->event_loop,
-        app->input_queue,
-        keymap_mode(app->keymap),
-        keymap_link(app->keymap),
-        keymap_legend(app->keymap));
-    app_follow_options(app);
+    ViewState state = {.flash = ActionNone};
+    app_follow_keymap(app, &state);
+    app->screen = screen_alloc(app->event_loop, app->input_queue, &state);
     /* Ahead of the transport: the loop serves the first reading before any link report
      * (event_loop.c:149, :552), so before the idle screen. */
     app->battery = battery_alloc(app->charge_queue, app->charging_queue);

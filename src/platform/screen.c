@@ -8,33 +8,15 @@ struct Screen {
     Gui* gui;
     ViewPort* view_port;
     FuriEventLoopTimer* flash_timer;
-    /* The draw callback reads these on the GUI thread. */
-    _Atomic Mode mode;
-    _Atomic Link link;
-    _Atomic bool legend;
-    _Atomic uint8_t charge;
-    _Atomic bool charging;
-    _Atomic Action flash;
-    _Atomic bool options[OptionMAX];
-    _Atomic Option cursor;
+    /* The draw callback copies the state on the GUI thread. */
+    FuriMutex* mutex;
+    ViewState state;
 };
 
 static void screen_draw_callback(Canvas* canvas, void* context) {
     Screen* screen = context;
-    bool options[OptionMAX];
-    for(Option option = OptionVibration; option < OptionMAX; option++) {
-        options[option] = screen->options[option];
-    }
-    view_draw(
-        canvas,
-        screen->mode,
-        screen->link,
-        screen->flash,
-        options,
-        screen->cursor,
-        screen->legend,
-        screen->charge,
-        screen->charging);
+    ViewState state = screen_state(screen);
+    view_draw(canvas, &state);
 }
 
 /* Runs on the GUI thread, and event_loop.h binds its functions to the loop's own thread. */
@@ -43,29 +25,23 @@ static void screen_input_callback(InputEvent* event, void* context) {
     furi_message_queue_put(input_queue, event, 0);
 }
 
-static void screen_flash_callback(void* context) {
-    Screen* screen = context;
-    screen->flash = ActionNone;
-    view_port_update(screen->view_port);
+static void screen_show_flash(Screen* screen, Action flash) {
+    ViewState state = screen_state(screen);
+    state.flash = flash;
+    screen_set_state(screen, &state);
 }
 
-Screen* screen_alloc(
-    FuriEventLoop* event_loop,
-    FuriMessageQueue* input_queue,
-    Mode mode,
-    Link link,
-    bool legend) {
+static void screen_flash_callback(void* context) {
+    Screen* screen = context;
+    screen_show_flash(screen, ActionNone);
+}
+
+/* The state comes before the view port joins the GUI, which asks for a frame at once (gui.c:245-270). */
+Screen*
+    screen_alloc(FuriEventLoop* event_loop, FuriMessageQueue* input_queue, const ViewState* state) {
     Screen* screen = malloc(sizeof(Screen));
-    screen->mode = mode;
-    screen->link = link;
-    screen->legend = legend;
-    screen->charge = 0;
-    screen->charging = false;
-    screen->flash = ActionNone;
-    for(Option option = OptionVibration; option < OptionMAX; option++) {
-        screen->options[option] = false;
-    }
-    screen->cursor = OptionVibration;
+    screen->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    screen->state = *state;
     screen->flash_timer = furi_event_loop_timer_alloc(
         event_loop, screen_flash_callback, FuriEventLoopTimerTypeOnce, screen);
 
@@ -78,51 +54,35 @@ Screen* screen_alloc(
     return screen;
 }
 
+/* The mutex goes after the view port leaves the GUI, which waits for a frame being drawn
+ * (gui.c:351-406). */
 void screen_free(Screen* screen) {
     gui_remove_view_port(screen->gui, screen->view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(screen->view_port);
     furi_event_loop_timer_free(screen->flash_timer);
+    furi_mutex_free(screen->mutex);
     free(screen);
 }
 
-void screen_set_mode(Screen* screen, Mode mode) {
-    screen->mode = mode;
-    view_port_update(screen->view_port);
+ViewState screen_state(Screen* screen) {
+    furi_check(furi_mutex_acquire(screen->mutex, FuriWaitForever) == FuriStatusOk);
+    ViewState state = screen->state;
+    furi_check(furi_mutex_release(screen->mutex) == FuriStatusOk);
+    return state;
 }
 
-void screen_set_link(Screen* screen, Link link) {
-    screen->link = link;
-    view_port_update(screen->view_port);
-}
-
-void screen_set_legend(Screen* screen, bool legend) {
-    screen->legend = legend;
-    view_port_update(screen->view_port);
-}
-
-void screen_set_charge(Screen* screen, uint8_t charge) {
-    screen->charge = charge;
-    view_port_update(screen->view_port);
-}
-
-void screen_set_charging(Screen* screen, bool charging) {
-    screen->charging = charging;
-    view_port_update(screen->view_port);
-}
-
-void screen_set_option(Screen* screen, Option option, bool on) {
-    screen->options[option] = on;
-    view_port_update(screen->view_port);
-}
-
-void screen_set_cursor(Screen* screen, Option cursor) {
-    screen->cursor = cursor;
+/* Only the event loop's callbacks set the state, so none loses a change between its read and
+ * its set. The mutex is released first: the update waits for the lock the draw callback runs
+ * under (view_port.c:202-220). */
+void screen_set_state(Screen* screen, const ViewState* state) {
+    furi_check(furi_mutex_acquire(screen->mutex, FuriWaitForever) == FuriStatusOk);
+    screen->state = *state;
+    furi_check(furi_mutex_release(screen->mutex) == FuriStatusOk);
     view_port_update(screen->view_port);
 }
 
 void screen_flash(Screen* screen, Action action, uint32_t duration_ms) {
-    screen->flash = action;
+    screen_show_flash(screen, action);
     furi_event_loop_timer_start(screen->flash_timer, furi_ms_to_ticks(duration_ms));
-    view_port_update(screen->view_port);
 }

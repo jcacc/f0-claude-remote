@@ -41,9 +41,10 @@ through no function named for one option and no comparison with an enumerator.
 
 #### Scenario: The platform follows
 - **WHEN** `git grep -n -E 'keymap_(option|cursor)' -- src/platform` runs
-- **THEN** it prints six lines of `app.c`:
+- **THEN** it prints seven lines of `app.c`:
   one hands the card its fallback, two give the backlight its light,
-  two follow the cursor and the options, and one asks about the buzz
+  two give the screen's state the options and the cursor, one hands the card each option,
+  and one asks about the buzz
 
 #### Scenario: By its name alone
 - **WHEN** `git grep -n -E '_(vibration|backlight)\(|(==|!=) Option' -- src` runs

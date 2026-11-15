@@ -2,6 +2,6 @@
 
 #include <gui/canvas.h>
 
-#include "../core/option.h"
+#include "view_state.h"
 
-void view_options_draw(Canvas* canvas, const bool options[OptionMAX], Option cursor);
+void view_options_draw(Canvas* canvas, const ViewState* state);

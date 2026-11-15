@@ -2,6 +2,6 @@
 
 #include <gui/canvas.h>
 
-#include "../core/action.h"
+#include "view_state.h"
 
-void view_idle_draw(Canvas* canvas, Action flash, bool legend, uint8_t charge, bool charging);
+void view_idle_draw(Canvas* canvas, const ViewState* state);

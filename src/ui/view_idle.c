@@ -117,15 +117,15 @@ static void view_idle_draw_flash(Canvas* canvas, Action flash) {
     canvas_set_color(canvas, ColorBlack);
 }
 
-void view_idle_draw(Canvas* canvas, Action flash, bool legend, uint8_t charge, bool charging) {
+void view_idle_draw(Canvas* canvas, const ViewState* state) {
     canvas_set_font(canvas, FontSecondary);
-    if(legend) {
+    if(state->legend) {
         view_idle_draw_legend(canvas);
     } else {
-        view_idle_draw_battery(canvas, charge, charging);
+        view_idle_draw_battery(canvas, state->charge, state->charging);
     }
     view_idle_draw_ring(canvas);
     view_idle_draw_ok_button(canvas);
     view_idle_draw_side_actions(canvas);
-    view_idle_draw_flash(canvas, flash);
+    view_idle_draw_flash(canvas, state->flash);
 }

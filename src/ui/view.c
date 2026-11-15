@@ -83,42 +83,33 @@ static void view_draw_stopped(Canvas* canvas, Link link) {
     canvas_draw_str(canvas, 62, 56, "exit");
 }
 
-void view_draw(
-    Canvas* canvas,
-    Mode mode,
-    Link link,
-    Action flash,
-    const bool options[OptionMAX],
-    Option cursor,
-    bool legend,
-    uint8_t charge,
-    bool charging) {
-    switch(mode) {
+void view_draw(Canvas* canvas, const ViewState* state) {
+    switch(state->mode) {
     case ModeIdle:
-        view_draw_title_row(canvas, view_links[link].mark, "Connected");
-        view_idle_draw(canvas, flash, legend, charge, charging);
+        view_draw_title_row(canvas, view_links[state->link].mark, "Connected");
+        view_idle_draw(canvas, state);
         break;
     case ModeVoice:
-        view_draw_voice(canvas, link);
+        view_draw_voice(canvas, state->link);
         break;
     case ModeOptions:
-        view_draw_title_row(canvas, view_links[link].mark, "Options");
-        view_options_draw(canvas, options, cursor);
+        view_draw_title_row(canvas, view_links[state->link].mark, "Options");
+        view_options_draw(canvas, state);
         break;
     case ModeNoLink:
-        view_draw_no_link(canvas, link, 28, "Keys are not sent");
-        view_draw_switch_plate(canvas, link);
+        view_draw_no_link(canvas, state->link, 28, "Keys are not sent");
+        view_draw_switch_plate(canvas, state->link);
         view_draw_hold_legend(canvas);
         break;
     case ModeVoiceCut:
-        view_draw_no_link(canvas, link, 11, "Voice stopped: release OK");
+        view_draw_no_link(canvas, state->link, 11, "Voice stopped: release OK");
         break;
     case ModeOptionsNoLink:
-        view_draw_title_row(canvas, view_links[link].no_link_mark, "Options");
-        view_options_draw(canvas, options, cursor);
+        view_draw_title_row(canvas, view_links[state->link].no_link_mark, "Options");
+        view_options_draw(canvas, state);
         break;
     case ModeStopped:
-        view_draw_stopped(canvas, link);
+        view_draw_stopped(canvas, state->link);
         break;
     }
 }
