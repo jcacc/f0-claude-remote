@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.4 — 2026-11-15
+
+### 🚀 Features
+
+- *(keymap)* Send left and right arrows on a tap, Esc on a hold (`2dafe77`)
+- *(view)* Trace the recess from the case (`e475a8f`)
+- *(options)* Add an options screen with a vibration switch (`cf1818e`)
+- *(options)* Keep the options across launches (`b6a2c2d`)
+- *(options)* Add a backlight option (`0f7dc4a`)
+- *(view)* Show the battery after the first press (`fbf98ca`)
+
+### 🚜 Refactor
+
+- *(options)* Hold the options in a table (`07cb212`)
+
+### 📚 Documentation
+
+- Show every screen in the readme and site (`d38bd05`)
+
+### 🏗️ Build & CI
+
+- *(release)* Add six more screenshots to the catalog manifest (`3f65835`)
+- *(release)* Show the battery on main.png, list options-bt.png (`8b7fd00`)
+
+### ⚙️ Miscellaneous Tasks
+
+- *(mise)* Bump prek, openspec, node and git-flow-next (`b783d4b`)
+
 ## 0.3 — 2026-11-13
 
 ### 🚜 Refactor
