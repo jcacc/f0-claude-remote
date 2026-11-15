@@ -23,9 +23,9 @@ static void view_options_draw_cursor(Canvas* canvas) {
     canvas_draw_icon(canvas, 120, 19, &I_right);
 }
 
-void view_options_draw(Canvas* canvas, bool vibration) {
+void view_options_draw(Canvas* canvas, const bool options[OptionMAX]) {
     canvas_set_font(canvas, FontSecondary);
     view_options_draw_plate(canvas);
-    view_options_draw_row(canvas, vibration);
+    view_options_draw_row(canvas, options[OptionVibration]);
     view_options_draw_cursor(canvas);
 }

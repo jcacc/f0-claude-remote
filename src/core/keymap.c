@@ -12,7 +12,7 @@ struct Keymap {
     bool pressed[KeymapKeyMAX];
     Link link;
     KeymapWait wait;
-    bool vibration;
+    bool options[OptionMAX];
 };
 
 static const Action keymap_actions[KeymapKeyMAX][KeymapEventMAX] = {
@@ -79,7 +79,7 @@ static void keymap_tap_options(Keymap* keymap, KeymapKey key, Mode closed) {
     if(key == KeymapKeyBack) {
         keymap_set_mode(keymap, closed);
     } else if(key == KeymapKeyLeft || key == KeymapKeyRight) {
-        keymap->vibration = !keymap->vibration;
+        keymap->options[OptionVibration] = !keymap->options[OptionVibration];
     }
 }
 
@@ -89,7 +89,9 @@ Keymap* keymap_alloc(void) {
     keymap_forget_presses(keymap);
     keymap->link = LinkBluetooth;
     keymap->wait = KeymapWaitStart;
-    keymap->vibration = true;
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        keymap->options[option] = true;
+    }
     return keymap;
 }
 
@@ -215,8 +217,8 @@ Action keymap_time_out(Keymap* keymap) {
     return ActionGiveUp;
 }
 
-void keymap_set_vibration(Keymap* keymap, bool vibration) {
-    keymap->vibration = vibration;
+void keymap_set_option(Keymap* keymap, Option option, bool on) {
+    keymap->options[option] = on;
 }
 
 KeymapWait keymap_wait(const Keymap* keymap) {
@@ -235,6 +237,6 @@ Link keymap_link(const Keymap* keymap) {
     return keymap->link;
 }
 
-bool keymap_vibration(const Keymap* keymap) {
-    return keymap->vibration;
+bool keymap_option(const Keymap* keymap, Option option) {
+    return keymap->options[option];
 }

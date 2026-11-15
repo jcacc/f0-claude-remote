@@ -845,16 +845,16 @@ static void test_options_act_only_on_held_back(void) {
 
 static void test_fresh_keymap_vibrates(void) {
     Keymap* keymap = keymap_alloc();
-    assert(keymap_vibration(keymap));
+    assert(keymap_option(keymap, OptionVibration));
     keymap_free(keymap);
 }
 
 static void test_keymap_takes_the_saved_vibration(void) {
     Keymap* keymap = keymap_alloc();
-    keymap_set_vibration(keymap, false);
-    assert(!keymap_vibration(keymap));
-    keymap_set_vibration(keymap, true);
-    assert(keymap_vibration(keymap));
+    keymap_set_option(keymap, OptionVibration, false);
+    assert(!keymap_option(keymap, OptionVibration));
+    keymap_set_option(keymap, OptionVibration, true);
+    assert(keymap_option(keymap, OptionVibration));
     assert(keymap_mode(keymap) == ModeNoLink);
     assert(keymap_link(keymap) == LinkBluetooth);
     assert(keymap_wait(keymap) == KeymapWaitStart);
@@ -870,13 +870,13 @@ static void test_side_tap_on_the_options_switches_vibration(void) {
         Keymap* keymap = allocs[i]();
         Mode mode = keymap_mode(keymap);
         assert(keymap_test_tap(keymap, KeymapKeyRight) == ActionNone);
-        assert(!keymap_vibration(keymap));
+        assert(!keymap_option(keymap, OptionVibration));
         assert(keymap_test_tap(keymap, KeymapKeyLeft) == ActionNone);
-        assert(keymap_vibration(keymap));
+        assert(keymap_option(keymap, OptionVibration));
         assert(keymap_test_tap(keymap, KeymapKeyLeft) == ActionNone);
-        assert(!keymap_vibration(keymap));
+        assert(!keymap_option(keymap, OptionVibration));
         assert(keymap_test_tap(keymap, KeymapKeyRight) == ActionNone);
-        assert(keymap_vibration(keymap));
+        assert(keymap_option(keymap, OptionVibration));
         assert(keymap_mode(keymap) == mode);
         keymap_free(keymap);
     }
@@ -904,18 +904,18 @@ static void test_nothing_else_switches_vibration(void) {
                         keymap_handle(keymap, key, KeymapEventPress);
                     }
                     keymap_handle(keymap, key, event);
-                    assert(keymap_vibration(keymap));
+                    assert(keymap_option(keymap, OptionVibration));
                 }
                 keymap_free(keymap);
             }
         }
         Keymap* keymap = allocs[i]();
         keymap_set_connected(keymap, false);
-        assert(keymap_vibration(keymap));
+        assert(keymap_option(keymap, OptionVibration));
         keymap_set_connected(keymap, true);
-        assert(keymap_vibration(keymap));
+        assert(keymap_option(keymap, OptionVibration));
         keymap_time_out(keymap);
-        assert(keymap_vibration(keymap));
+        assert(keymap_option(keymap, OptionVibration));
         keymap_free(keymap);
     }
 }
@@ -925,20 +925,20 @@ static void test_vibration_outlasts_the_options(void) {
     keymap_test_tap(keymap, KeymapKeyRight);
     keymap_test_tap(keymap, KeymapKeyBack);
     assert(keymap_mode(keymap) == ModeIdle);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     assert(keymap_test_tap(keymap, KeymapKeyUp) == ActionArrowUp);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     keymap_set_connected(keymap, false);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     keymap_time_out(keymap);
     assert(keymap_mode(keymap) == ModeStopped);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     keymap_handle(keymap, KeymapKeyUp, KeymapEventPress);
     keymap_set_connected(keymap, true);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     keymap_test_tap(keymap, KeymapKeyBack);
     assert(keymap_mode(keymap) == ModeOptions);
-    assert(!keymap_vibration(keymap));
+    assert(!keymap_option(keymap, OptionVibration));
     keymap_free(keymap);
 }
 
@@ -960,7 +960,7 @@ static void test_tap_through_a_drop_on_the_options_does_nothing(void) {
     keymap_handle(keymap, KeymapKeyRight, KeymapEventPress);
     keymap_set_connected(keymap, false);
     assert(keymap_handle(keymap, KeymapKeyRight, KeymapEventShort) == ActionNone);
-    assert(keymap_vibration(keymap));
+    assert(keymap_option(keymap, OptionVibration));
     keymap_handle(keymap, KeymapKeyBack, KeymapEventPress);
     keymap_set_connected(keymap, true);
     assert(keymap_handle(keymap, KeymapKeyBack, KeymapEventShort) == ActionNone);

@@ -23,6 +23,7 @@ and the platform supplies it, as `transport_hid.c` does.
 | `src/core/action.h` | Names the remote's actions |
 | `src/core/mode.h` | Names the remote's modes |
 | `src/core/link.h` | Names the remote's links |
+| `src/core/option.h` | Names the remote's options |
 | `src/core/keymap.h`, `src/core/keymap.c` | Maps a button event, a link change or the wait's end to an action, given the mode |
 | `src/core/feedback.h`, `src/core/feedback.c` | Says how an action confirms itself |
 | `src/core/deed.h`, `src/core/deed.c` | Says which deed an action earns |
@@ -54,8 +55,8 @@ and the platform supplies it, as `transport_hid.c` does.
 6. `transport_hid.c`: turns each key into its code, for the link in use.
 7. `transport_bluetooth.c` or `transport_usb.c`: puts the code into the link's report.
 
-Before step 5, `app.c` hands `screen.c` the mode, the link and Vibration `keymap.c` holds,
-`options_file.c` that Vibration, which writes it to the SD card unless it is the one held,
+Before step 5, `app.c` hands `screen.c` the mode, the link and each option `keymap.c` holds,
+`options_file.c` each option, which writes the options to the SD card unless it is the one held,
 then `transport_hid.c` that link, which switches to it unless it is the one in use.
 After step 7, it hands the firmware's dolphin the deed `deed.c` names,
 buzzes as `feedback.c` says of the action and Vibration, and has `screen.c` flash.
@@ -70,9 +71,9 @@ The wait takes a timer in `app.c`, started and stopped as `keymap.c`'s `keymap_w
 Its end goes to `keymap.c` too, whose answer `actions.c` turns into withdrawing the link,
 and `app.c` has `backlight.c` go dark, as `display.c` says of the new mode.
 
-At the opening, `app.c` hands `options_file.c` the Vibration `keymap.c` opens with,
+At the opening, `app.c` hands `options_file.c` each option `keymap.c` opens with,
 and `keymap.c` the one `options_file.c` answers: read from the SD card, or the one handed where it reads none.
 
 The queues exist because every function of an event loop must be called from the thread that made it
 (documented: [`event_loop.h`](https://github.com/flipperdevices/flipperzero-firmware/blob/1.5.1/furi/core/event_loop.h#L15)).
-The draw callback, on the GUI thread, reads the mode, the link, the flash and Vibration as four `_Atomic` words.
+The draw callback, on the GUI thread, reads the mode, the link, the flash and each option as `_Atomic` words.

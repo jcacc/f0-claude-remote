@@ -39,7 +39,7 @@ static void app_perform(App* app, Action action) {
     if(deed != DeedNone) {
         dolphin_deed(app_dolphin_deeds[deed]);
     }
-    if(feedback_vibrates(action, keymap_vibration(app->keymap))) {
+    if(feedback_vibrates(action, keymap_option(app->keymap, OptionVibration))) {
         notification_message(app->notification, &sequence_single_vibro);
     }
     uint32_t flash_ms = feedback_flash_ms(action);
@@ -65,12 +65,19 @@ static void app_follow_wait(App* app) {
     }
 }
 
+static void app_follow_options(App* app) {
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        bool on = keymap_option(app->keymap, option);
+        screen_set_option(app->screen, option, on);
+        options_file_set_option(app->options_file, option, on);
+    }
+}
+
 /* The board goes first: a switch then holds this loop at least 700 ms. */
 static void app_settle(App* app, Action action) {
     screen_set_mode(app->screen, keymap_mode(app->keymap));
     screen_set_link(app->screen, keymap_link(app->keymap));
-    screen_set_vibration(app->screen, keymap_vibration(app->keymap));
-    options_file_set_vibration(app->options_file, keymap_vibration(app->keymap));
+    app_follow_options(app);
     transport_hid_set_link(app->transport, keymap_link(app->keymap));
     if(action != ActionNone) {
         app_perform(app, action);
@@ -121,15 +128,16 @@ App* app_alloc(void) {
         app->event_loop, app_wait_callback, FuriEventLoopTimerTypeOnce, app);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->keymap = keymap_alloc();
-    app->options_file = options_file_alloc(keymap_vibration(app->keymap));
-    keymap_set_vibration(app->keymap, options_file_vibration(app->options_file));
+    app->options_file = options_file_alloc();
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        bool fallback = keymap_option(app->keymap, option);
+        keymap_set_option(
+            app->keymap, option, options_file_read_option(app->options_file, option, fallback));
+    }
     app->backlight = backlight_alloc(display_lit(keymap_mode(app->keymap)));
     app->screen = screen_alloc(
-        app->event_loop,
-        app->input_queue,
-        keymap_mode(app->keymap),
-        keymap_link(app->keymap),
-        keymap_vibration(app->keymap));
+        app->event_loop, app->input_queue, keymap_mode(app->keymap), keymap_link(app->keymap));
+    app_follow_options(app);
     app->transport = transport_hid_alloc(app->link_queue, keymap_link(app->keymap));
     app_follow_wait(app);
     return app;

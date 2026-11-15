@@ -2,4 +2,6 @@
 
 #include <gui/canvas.h>
 
-void view_options_draw(Canvas* canvas, bool vibration);
+#include "../core/option.h"
+
+void view_options_draw(Canvas* canvas, const bool options[OptionMAX]);

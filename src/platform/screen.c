@@ -12,12 +12,16 @@ struct Screen {
     _Atomic Mode mode;
     _Atomic Link link;
     _Atomic Action flash;
-    _Atomic bool vibration;
+    _Atomic bool options[OptionMAX];
 };
 
 static void screen_draw_callback(Canvas* canvas, void* context) {
     Screen* screen = context;
-    view_draw(canvas, screen->mode, screen->link, screen->flash, screen->vibration);
+    bool options[OptionMAX];
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        options[option] = screen->options[option];
+    }
+    view_draw(canvas, screen->mode, screen->link, screen->flash, options);
 }
 
 /* Runs on the GUI thread, and event_loop.h binds its functions to the loop's own thread. */
@@ -32,17 +36,15 @@ static void screen_flash_callback(void* context) {
     view_port_update(screen->view_port);
 }
 
-Screen* screen_alloc(
-    FuriEventLoop* event_loop,
-    FuriMessageQueue* input_queue,
-    Mode mode,
-    Link link,
-    bool vibration) {
+Screen*
+    screen_alloc(FuriEventLoop* event_loop, FuriMessageQueue* input_queue, Mode mode, Link link) {
     Screen* screen = malloc(sizeof(Screen));
     screen->mode = mode;
     screen->link = link;
     screen->flash = ActionNone;
-    screen->vibration = vibration;
+    for(Option option = OptionVibration; option < OptionMAX; option++) {
+        screen->options[option] = false;
+    }
     screen->flash_timer = furi_event_loop_timer_alloc(
         event_loop, screen_flash_callback, FuriEventLoopTimerTypeOnce, screen);
 
@@ -73,8 +75,8 @@ void screen_set_link(Screen* screen, Link link) {
     view_port_update(screen->view_port);
 }
 
-void screen_set_vibration(Screen* screen, bool vibration) {
-    screen->vibration = vibration;
+void screen_set_option(Screen* screen, Option option, bool on) {
+    screen->options[option] = on;
     view_port_update(screen->view_port);
 }
 

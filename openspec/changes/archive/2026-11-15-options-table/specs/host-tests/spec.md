@@ -3,12 +3,12 @@
 ## MODIFIED Requirements
 
 ### Requirement: The core holds the options' values
-The value of each of `options`' options SHALL be held in `src/core/` by the keymap, which answers it after every event,
-and whether an action vibrates the device SHALL be decided there from that value.
-The keymap's suite SHALL pin when the value changes and when it stays,
+Each of `options`' values SHALL be held by the core's keymap, which answers it after every event,
+and whether an action vibrates SHALL be decided there from Vibration's.
+The keymap's suite SHALL pin when a value changes and when it stays,
 the feedback's suite the buzz for either value,
-and the platform SHALL show the value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
-Every unit SHALL reach an option by its name among the options, and no function SHALL be named for one option.
+and the platform SHALL show each value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
+Every unit SHALL reach an option by its name; no function SHALL be named for one.
 
 #### Scenario: Changed
 - **WHEN** Left or Right is tapped on the options, from a press made there

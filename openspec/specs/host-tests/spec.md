@@ -129,11 +129,12 @@ at the opening as after an event.
   the two that open the screen and the transport, and the two that set them after an event
 
 ### Requirement: The core holds the options' values
-The value of each of `options`' options SHALL be held in `src/core/` by the keymap, which answers it after every event,
-and whether an action vibrates the device SHALL be decided there from that value.
-The keymap's suite SHALL pin when the value changes and when it stays,
+Each of `options`' values SHALL be held by the core's keymap, which answers it after every event,
+and whether an action vibrates SHALL be decided there from Vibration's.
+The keymap's suite SHALL pin when a value changes and when it stays,
 the feedback's suite the buzz for either value,
-and the platform SHALL show the value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
+and the platform SHALL show each value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
+Every unit SHALL reach an option by its name; no function SHALL be named for one.
 
 #### Scenario: Changed
 - **WHEN** Left or Right is tapped on the options, from a press made there
@@ -151,10 +152,15 @@ and the platform SHALL show the value, keep it on the SD card and buzz by those 
   and no for every action with it `Off`
 
 #### Scenario: The platform follows
-- **WHEN** `git grep -n 'keymap_vibration' -- src/platform` runs
-- **THEN** it prints five lines of `app.c`:
-  the two that open the file and the screen, the two that set them after an event,
+- **WHEN** `git grep -n 'keymap_option' -- src/platform` runs
+- **THEN** it prints three lines of `app.c`:
+  the one that hands the card its fallback at the opening,
+  the one that follows the options, at the opening as after an event,
   and the one that asks about the buzz
+
+#### Scenario: No function of one option
+- **WHEN** `git grep -n -E '_vibration\(' -- src` runs
+- **THEN** it prints nothing
 
 ### Requirement: The core takes the options the card holds
 The keymap SHALL open with each of `options`' options as it is by default,
@@ -170,5 +176,5 @@ The keymap's suite SHALL pin both.
 - **THEN** it answers each in turn, and the mode, the link and the wait it opened with
 
 #### Scenario: Handed once
-- **WHEN** `git grep -n 'keymap_set_vibration' -- src/platform` runs
+- **WHEN** `git grep -n 'keymap_set_option' -- src/platform` runs
 - **THEN** it prints one line of `app.c`
