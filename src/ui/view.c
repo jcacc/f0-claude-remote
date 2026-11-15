@@ -83,7 +83,13 @@ static void view_draw_stopped(Canvas* canvas, Link link) {
     canvas_draw_str(canvas, 62, 56, "exit");
 }
 
-void view_draw(Canvas* canvas, Mode mode, Link link, Action flash, const bool options[OptionMAX]) {
+void view_draw(
+    Canvas* canvas,
+    Mode mode,
+    Link link,
+    Action flash,
+    const bool options[OptionMAX],
+    Option cursor) {
     switch(mode) {
     case ModeIdle:
         view_draw_title_row(canvas, view_links[link].mark, "Connected");
@@ -94,7 +100,7 @@ void view_draw(Canvas* canvas, Mode mode, Link link, Action flash, const bool op
         break;
     case ModeOptions:
         view_draw_title_row(canvas, view_links[link].mark, "Options");
-        view_options_draw(canvas, options);
+        view_options_draw(canvas, options, cursor);
         break;
     case ModeNoLink:
         view_draw_no_link(canvas, link, 28, "Keys are not sent");
@@ -106,7 +112,7 @@ void view_draw(Canvas* canvas, Mode mode, Link link, Action flash, const bool op
         break;
     case ModeOptionsNoLink:
         view_draw_title_row(canvas, view_links[link].no_link_mark, "Options");
-        view_options_draw(canvas, options);
+        view_options_draw(canvas, options, cursor);
         break;
     case ModeStopped:
         view_draw_stopped(canvas, link);

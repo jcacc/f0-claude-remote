@@ -19,24 +19,6 @@ On any other board a tap on Back SHALL open nothing.
 - **WHEN** Back is tapped on the options with the link up
 - **THEN** `D_Main` shows
 
-### Requirement: On the options only Left, Right and Back act
-On the options a tap on Left or Right SHALL give the option under the cursor its other value,
-holding Back SHALL end the application,
-and no gesture but these and Back's tap SHALL do anything.
-None SHALL send a key, vibrate the device or flash.
-
-#### Scenario: A value
-- **WHEN** Left or Right is tapped on the options
-- **THEN** the row under the cursor shows its other value
-
-#### Scenario: Every other gesture
-- **WHEN** Up, Down and OK are tapped and held on the options, and Left and Right are held
-- **THEN** the options do not change, voice does not start, and no key is sent
-
-#### Scenario: Exit
-- **WHEN** Back is held on the options until the long press fires
-- **THEN** the application ends
-
 ### Requirement: Vibration can be turned off
 The options SHALL hold Vibration, `On` or `Off`, and it SHALL be `On` until it is changed.
 While it is `Off` no action SHALL vibrate the device, and each SHALL act and flash as with it `On`.
@@ -73,31 +55,41 @@ Vibration SHALL keep its value throughout.
 - **WHEN** 60 s pass with no link from a drop on the options
 - **THEN** `D_stopped` shows, and Vibration keeps its value
 
-### Requirement: The options are kept on the SD card
-A change of an option SHALL be written at once to `apps_data/f0_claude_remote/options.txt` on the SD card,
-as text: the file's type, its version and a line for each option.
-No other event SHALL write the file.
-The application SHALL open with the options a file of this type and version gives,
-and with every other option as it is by default.
-A file that cannot be written SHALL change nothing else.
+### Requirement: On the options the arrows and Back act
+On the options a tap on Up or Down SHALL move the cursor to the other row,
+a tap on Left or Right SHALL give the option under the cursor its other value,
+holding Back SHALL end the application,
+and no gesture but these and Back's tap SHALL do anything.
+None SHALL send a key, vibrate the device or flash.
+The cursor SHALL stand on `Vibration` when the application opens,
+and SHALL move on a tap of Up or Down on the options alone.
 
-#### Scenario: Written
-- **WHEN** Vibration is turned `Off` on the options, then `On`
-- **THEN** the file reads `Filetype: Claude Remote Options`, `Version: 1` and `Vibration: false`, a line each,
-  then the same with `Vibration: true`
+#### Scenario: The cursor
+- **WHEN** the options open for the first time since the launch, and Up is tapped, then Down
+- **THEN** the cursor's frame stands on `Vibration`, on `Backlight`, then on `Vibration`
 
-#### Scenario: Left at once
-- **WHEN** Vibration is changed, and Back is held at once until the application ends
-- **THEN** the file holds the new value, whole
+#### Scenario: A value
+- **WHEN** Left or Right is tapped on the options
+- **THEN** the row under the cursor shows its other value, and the other row the value it had
 
-#### Scenario: Nothing to write
-- **WHEN** the application opens with no file, and the options are opened and closed
-- **THEN** they show Vibration `On`, and there is still no file
+#### Scenario: Every other gesture
+- **WHEN** OK is tapped and held on the options, and Up, Down, Left and Right are held
+- **THEN** the options do not change, voice does not start, and no key is sent
 
-#### Scenario: Another file
-- **WHEN** the application opens on a file of another type, of another version, or with no line for Vibration
-- **THEN** the options show Vibration `On`, and the next change writes the file whole
+#### Scenario: Exit
+- **WHEN** Back is held on the options until the long press fires
+- **THEN** the application ends
 
-#### Scenario: Not written
-- **WHEN** a folder stands in the file's place, and Vibration is changed
-- **THEN** the options show the new value, and the next launch opens with Vibration `On`
+#### Scenario: The cursor stays
+- **WHEN** the cursor stands on `Backlight`, and the options are closed and opened again
+- **THEN** the cursor's frame stands on `Backlight`
+
+### Requirement: Backlight can be left to the device
+The options SHALL hold Backlight, `On` or `Auto`, and it SHALL be `On` until it is changed.
+`On` SHALL keep the backlight on and `Auto` leave it to the device's Backlight Time,
+each as `app-screen`'s `The backlight follows the offer` says.
+A change SHALL hold at once, and across launches, until the next change.
+
+#### Scenario: Opened again
+- **WHEN** the application ends with Backlight `Auto` and opens again
+- **THEN** the options show Backlight `Auto`

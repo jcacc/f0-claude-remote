@@ -13,6 +13,7 @@ struct Screen {
     _Atomic Link link;
     _Atomic Action flash;
     _Atomic bool options[OptionMAX];
+    _Atomic Option cursor;
 };
 
 static void screen_draw_callback(Canvas* canvas, void* context) {
@@ -21,7 +22,7 @@ static void screen_draw_callback(Canvas* canvas, void* context) {
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         options[option] = screen->options[option];
     }
-    view_draw(canvas, screen->mode, screen->link, screen->flash, options);
+    view_draw(canvas, screen->mode, screen->link, screen->flash, options, screen->cursor);
 }
 
 /* Runs on the GUI thread, and event_loop.h binds its functions to the loop's own thread. */
@@ -45,6 +46,7 @@ Screen*
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         screen->options[option] = false;
     }
+    screen->cursor = OptionVibration;
     screen->flash_timer = furi_event_loop_timer_alloc(
         event_loop, screen_flash_callback, FuriEventLoopTimerTypeOnce, screen);
 
@@ -77,6 +79,11 @@ void screen_set_link(Screen* screen, Link link) {
 
 void screen_set_option(Screen* screen, Option option, bool on) {
     screen->options[option] = on;
+    view_port_update(screen->view_port);
+}
+
+void screen_set_cursor(Screen* screen, Option cursor) {
+    screen->cursor = cursor;
     view_port_update(screen->view_port);
 }
 

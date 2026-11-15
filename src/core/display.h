@@ -4,4 +4,10 @@
 
 #include "mode.h"
 
-bool display_lit(Mode mode);
+typedef enum {
+    DisplayLightOn,
+    DisplayLightAuto,
+    DisplayLightOff,
+} DisplayLight;
+
+DisplayLight display_light(Mode mode, bool backlight);

@@ -1,6 +1,6 @@
 #include "display.h"
 
-bool display_lit(Mode mode) {
+DisplayLight display_light(Mode mode, bool backlight) {
     switch(mode) {
     case ModeIdle:
     case ModeVoice:
@@ -8,9 +8,9 @@ bool display_lit(Mode mode) {
     case ModeNoLink:
     case ModeVoiceCut:
     case ModeOptionsNoLink:
-        return true;
+        return backlight ? DisplayLightOn : DisplayLightAuto;
     case ModeStopped:
         break;
     }
-    return false;
+    return DisplayLightOff;
 }

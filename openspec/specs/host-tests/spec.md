@@ -70,23 +70,29 @@ so `mise run test` fails at a mode nobody has asked.
 
 #### Scenario: A mode not asked
 - **WHEN** an enumerator is added to the enum in `src/core/mode.h`,
-  and to no switch but the one that says whether a mode keeps the display lit,
+  and to no switch but the one that says what light a mode gives the display,
   and `mise run test` runs
 - **THEN** it exits non-zero and names that enumerator at the switch that says how long a mode waits
 
 ### Requirement: The core decides when the display is lit
-Whether the backlight of `app-screen`'s `The backlight follows the offer` is on SHALL be decided in `src/core/`,
-which says of each mode, in a `switch` over the modes, whether it keeps the display lit.
-A suite of its own SHALL pin that answer for every mode,
+Whether the backlight of `app-screen`'s `The backlight follows the offer` is held on, left to the device or off
+SHALL be decided in `src/core/`,
+which says it of each mode, in a `switch` over the modes, given `options`' Backlight.
+A suite of its own SHALL pin that answer for every mode and either value,
 and the platform SHALL light and darken the display by it alone, at the opening as after it,
 naming no action for the light.
 
 #### Scenario: Lit
-- **WHEN** the mode holds the link or offers it: idle, voice, no link, a voice cut by the link, or the options, with a link or with none
-- **THEN** the core answers that the display is lit
+- **WHEN** the mode holds the link or offers it: idle, voice, no link, a voice cut by the link, or the options, with a link or with none,
+  and Backlight is `On`
+- **THEN** the core answers that the display is held lit
+
+#### Scenario: Left to the device
+- **WHEN** the mode is one of those six, and Backlight is `Auto`
+- **THEN** the core answers that the display is left to the device
 
 #### Scenario: Dark
-- **WHEN** the mode is the one of a stopped offer
+- **WHEN** the mode is the one of a stopped offer, with Backlight `On` or `Auto`
 - **THEN** the core answers that the display is dark
 
 #### Scenario: No action named for the light
@@ -94,12 +100,12 @@ naming no action for the light.
 - **THEN** it prints nothing
 
 #### Scenario: The opening
-- **WHEN** `git grep -n 'display_lit' -- src/platform` runs
+- **WHEN** `git grep -n 'display_light' -- src/platform` runs
 - **THEN** it prints two lines of `app.c`: the one that opens the backlight, and the one that sets it after an event
 
 #### Scenario: A mode not asked
 - **WHEN** an enumerator is added to the enum in `src/core/mode.h`, and to no switch, and `mise run test` runs
-- **THEN** it exits non-zero and names that enumerator at the switch that says whether a mode keeps the display lit
+- **THEN** it exits non-zero and names that enumerator at the switch that says what light a mode gives the display
 
 ### Requirement: The core decides which link is in use
 Which of the links of `bluetooth-link` and `usb-link` the remote is on SHALL be decided in `src/core/` by the keymap,
@@ -127,54 +133,3 @@ at the opening as after an event.
 - **WHEN** `git grep -n 'keymap_link' -- src/platform` runs
 - **THEN** it prints four lines of `app.c`:
   the two that open the screen and the transport, and the two that set them after an event
-
-### Requirement: The core holds the options' values
-Each of `options`' values SHALL be held by the core's keymap, which answers it after every event,
-and whether an action vibrates SHALL be decided there from Vibration's.
-The keymap's suite SHALL pin when a value changes and when it stays,
-the feedback's suite the buzz for either value,
-and the platform SHALL show each value, keep it on the SD card and buzz by those answers alone, at the opening as after an event.
-Every unit SHALL reach an option by its name; no function SHALL be named for one.
-
-#### Scenario: Changed
-- **WHEN** Left or Right is tapped on the options, from a press made there
-- **THEN** the core answers Vibration's other value, and no action
-
-#### Scenario: Stayed
-- **WHEN** any other event comes:
-  another gesture on the options, a tap begun there before the link changed,
-  a tap or hold on another screen, or a change of mode
-- **THEN** the core answers the value it held
-
-#### Scenario: The buzz
-- **WHEN** the core is asked whether an action vibrates the device
-- **THEN** it answers yes for each action of `button-actions`' `An action confirms itself with one buzz` with Vibration `On`,
-  and no for every action with it `Off`
-
-#### Scenario: The platform follows
-- **WHEN** `git grep -n 'keymap_option' -- src/platform` runs
-- **THEN** it prints three lines of `app.c`:
-  the one that hands the card its fallback at the opening,
-  the one that follows the options, at the opening as after an event,
-  and the one that asks about the buzz
-
-#### Scenario: No function of one option
-- **WHEN** `git grep -n -E '_vibration\(' -- src` runs
-- **THEN** it prints nothing
-
-### Requirement: The core takes the options the card holds
-The keymap SHALL open with each of `options`' options as it is by default,
-and SHALL take from the platform, once, at the opening, the value read from the SD card, moving nothing else.
-The keymap's suite SHALL pin both.
-
-#### Scenario: Opened
-- **WHEN** a keymap opens
-- **THEN** it answers Vibration `On`
-
-#### Scenario: Taken from the card
-- **WHEN** a keymap just opened is handed a saved Vibration, `Off` and then `On`
-- **THEN** it answers each in turn, and the mode, the link and the wait it opened with
-
-#### Scenario: Handed once
-- **WHEN** `git grep -n 'keymap_set_option' -- src/platform` runs
-- **THEN** it prints one line of `app.c`

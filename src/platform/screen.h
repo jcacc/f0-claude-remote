@@ -20,4 +20,6 @@ void screen_set_link(Screen* screen, Link link);
 
 void screen_set_option(Screen* screen, Option option, bool on);
 
+void screen_set_cursor(Screen* screen, Option cursor);
+
 void screen_flash(Screen* screen, Action action, uint32_t duration_ms);

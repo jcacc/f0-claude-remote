@@ -58,12 +58,15 @@ as the legend `HOLD` and `TAP` in the top row says.
 ![The options](../assets/screenshot/options-bt.png)
 
 **`Options`** open with a tap on Back from the main screen, where a gear ends Back's plate.
-`Vibration` is `On` until it is changed,
-and a tap on Left or Right turns it `Off` or `On` at once, without a buzz.
+`Vibration` and `Backlight` are `On` until they are changed.
+A tap on Up or Down moves the frame to the other row,
+and a tap on Left or Right gives the framed row its other value at once, without a buzz.
+With Vibration `Off` no action buzzes, and each still acts and flashes.
+With Backlight `Auto` the screen goes dark by the device's Backlight Time,
+and a press then lights it and acts as well.
 A change is saved on the SD card at once, and the next launch opens with it.
-With it `Off` no action buzzes, and each still acts and flashes.
 A tap on Back returns to the main screen, holding it leaves the app,
-and no other button acts there.
+and OK and every other hold do nothing there.
 A lost link shows its mark in the top row and leaves the options open,
 and a tap on Back then shows `No link`.
 

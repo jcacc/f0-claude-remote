@@ -78,7 +78,8 @@ the buzz and flash confirming it, and each screen, below its screenshot.
 - **THEN** it holds the twelve rows of the keys table,
   what the left arrow does on an empty prompt,
   that Vibration `Off` leaves the flash alone to confirm,
-  and the main screen, the options with what Left, Right and Back do there
+  and the main screen, the options with what Up, Down, Left, Right and Back do there,
+  that Backlight `Auto` leaves the screen to the device's Backlight Time, where a press lights it and acts,
   and that a change is saved on the SD card for the next launch,
   `Listening`, `No link` with `Keys are not sent` and Right's hold for USB and back,
   `Voice stopped: release OK`,

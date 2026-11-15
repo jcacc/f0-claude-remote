@@ -7,4 +7,10 @@
 #include "../core/mode.h"
 #include "../core/option.h"
 
-void view_draw(Canvas* canvas, Mode mode, Link link, Action flash, const bool options[OptionMAX]);
+void view_draw(
+    Canvas* canvas,
+    Mode mode,
+    Link link,
+    Action flash,
+    const bool options[OptionMAX],
+    Option cursor);

@@ -13,6 +13,7 @@ struct Keymap {
     Link link;
     KeymapWait wait;
     bool options[OptionMAX];
+    Option cursor;
 };
 
 static const Action keymap_actions[KeymapKeyMAX][KeymapEventMAX] = {
@@ -27,6 +28,11 @@ static const Action keymap_actions[KeymapKeyMAX][KeymapEventMAX] = {
 static const Link keymap_other_links[LinkMAX] = {
     [LinkBluetooth] = LinkUsb,
     [LinkUsb] = LinkBluetooth,
+};
+
+static const Option keymap_other_options[OptionMAX] = {
+    [OptionVibration] = OptionBacklight,
+    [OptionBacklight] = OptionVibration,
 };
 
 static uint32_t keymap_mode_wait_ms(Mode mode) {
@@ -74,12 +80,14 @@ static void keymap_set_mode(Keymap* keymap, Mode mode) {
     keymap_set_screen(keymap, mode, keymap->link);
 }
 
-/* Vibration has two values, so Left and Right both give it the other. */
+/* Each option has two values and the options two rows, so either key gives the other. */
 static void keymap_tap_options(Keymap* keymap, KeymapKey key, Mode closed) {
     if(key == KeymapKeyBack) {
         keymap_set_mode(keymap, closed);
+    } else if(key == KeymapKeyUp || key == KeymapKeyDown) {
+        keymap->cursor = keymap_other_options[keymap->cursor];
     } else if(key == KeymapKeyLeft || key == KeymapKeyRight) {
-        keymap->options[OptionVibration] = !keymap->options[OptionVibration];
+        keymap->options[keymap->cursor] = !keymap->options[keymap->cursor];
     }
 }
 
@@ -92,6 +100,7 @@ Keymap* keymap_alloc(void) {
     for(Option option = OptionVibration; option < OptionMAX; option++) {
         keymap->options[option] = true;
     }
+    keymap->cursor = OptionVibration;
     return keymap;
 }
 
@@ -239,4 +248,8 @@ Link keymap_link(const Keymap* keymap) {
 
 bool keymap_option(const Keymap* keymap, Option option) {
     return keymap->options[option];
+}
+
+Option keymap_cursor(const Keymap* keymap) {
+    return keymap->cursor;
 }

@@ -10,6 +10,7 @@ static const uint32_t options_file_version = 1;
 
 static const char* const options_file_keys[OptionMAX] = {
     [OptionVibration] = "Vibration",
+    [OptionBacklight] = "Backlight",
 };
 
 struct OptionsFile {

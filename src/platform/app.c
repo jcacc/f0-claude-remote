@@ -71,6 +71,7 @@ static void app_follow_options(App* app) {
         screen_set_option(app->screen, option, on);
         options_file_set_option(app->options_file, option, on);
     }
+    screen_set_cursor(app->screen, keymap_cursor(app->keymap));
 }
 
 /* The board goes first: a switch then holds this loop at least 700 ms. */
@@ -82,7 +83,9 @@ static void app_settle(App* app, Action action) {
     if(action != ActionNone) {
         app_perform(app, action);
     }
-    backlight_set(app->backlight, display_lit(keymap_mode(app->keymap)));
+    backlight_set(
+        app->backlight,
+        display_light(keymap_mode(app->keymap), keymap_option(app->keymap, OptionBacklight)));
     app_follow_wait(app);
 }
 
@@ -134,7 +137,8 @@ App* app_alloc(void) {
         keymap_set_option(
             app->keymap, option, options_file_read_option(app->options_file, option, fallback));
     }
-    app->backlight = backlight_alloc(display_lit(keymap_mode(app->keymap)));
+    app->backlight = backlight_alloc(
+        display_light(keymap_mode(app->keymap), keymap_option(app->keymap, OptionBacklight)));
     app->screen = screen_alloc(
         app->event_loop, app->input_queue, keymap_mode(app->keymap), keymap_link(app->keymap));
     app_follow_options(app);
