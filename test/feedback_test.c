@@ -64,6 +64,27 @@ static void test_the_rest_do_not_flash(void) {
     assert(feedback_flash_ms(ActionStartOver) == 0);
 }
 
+static void test_what_flashes_stays_named_for_3_s(void) {
+    assert(feedback_sent_ms(ActionEffortHigh) == 3000);
+    assert(feedback_sent_ms(ActionEffortMax) == 3000);
+    assert(feedback_sent_ms(ActionClear) == 3000);
+    assert(feedback_sent_ms(ActionEsc) == 3000);
+    assert(feedback_sent_ms(ActionEnter) == 3000);
+    assert(feedback_sent_ms(ActionArrowUp) == 3000);
+    assert(feedback_sent_ms(ActionArrowDown) == 3000);
+    assert(feedback_sent_ms(ActionArrowLeft) == 3000);
+    assert(feedback_sent_ms(ActionArrowRight) == 3000);
+}
+
+static void test_the_rest_are_not_named(void) {
+    assert(feedback_sent_ms(ActionNone) == 0);
+    assert(feedback_sent_ms(ActionVoiceStart) == 0);
+    assert(feedback_sent_ms(ActionVoiceStop) == 0);
+    assert(feedback_sent_ms(ActionExit) == 0);
+    assert(feedback_sent_ms(ActionGiveUp) == 0);
+    assert(feedback_sent_ms(ActionStartOver) == 0);
+}
+
 int main(void) {
     test_run(test_sent_actions_vibrate);
     test_run(test_the_rest_stay_silent);
@@ -71,5 +92,7 @@ int main(void) {
     test_run(test_arrows_flash_for_100_ms);
     test_run(test_enter_and_commands_flash_for_400_ms);
     test_run(test_the_rest_do_not_flash);
+    test_run(test_what_flashes_stays_named_for_3_s);
+    test_run(test_the_rest_are_not_named);
     return 0;
 }

@@ -47,3 +47,8 @@ uint32_t feedback_flash_ms(Action action) {
     }
     return 0;
 }
+
+/* The label names what flashed, so one list holds both. */
+uint32_t feedback_sent_ms(Action action) {
+    return feedback_flash_ms(action) > 0 ? 3000 : 0;
+}

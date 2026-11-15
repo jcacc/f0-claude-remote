@@ -8,6 +8,7 @@ struct Screen {
     Gui* gui;
     ViewPort* view_port;
     FuriEventLoopTimer* flash_timer;
+    FuriEventLoopTimer* sent_timer;
     /* The draw callback copies the state on the GUI thread. */
     FuriMutex* mutex;
     ViewState state;
@@ -25,15 +26,18 @@ static void screen_input_callback(InputEvent* event, void* context) {
     furi_message_queue_put(input_queue, event, 0);
 }
 
-static void screen_show_flash(Screen* screen, Action flash) {
+static void screen_flash_callback(void* context) {
+    Screen* screen = context;
     ViewState state = screen_state(screen);
-    state.flash = flash;
+    state.flash = ActionNone;
     screen_set_state(screen, &state);
 }
 
-static void screen_flash_callback(void* context) {
+static void screen_sent_callback(void* context) {
     Screen* screen = context;
-    screen_show_flash(screen, ActionNone);
+    ViewState state = screen_state(screen);
+    state.sent = ActionNone;
+    screen_set_state(screen, &state);
 }
 
 /* The state comes before the view port joins the GUI, which asks for a frame at once (gui.c:245-270). */
@@ -44,6 +48,8 @@ Screen*
     screen->state = *state;
     screen->flash_timer = furi_event_loop_timer_alloc(
         event_loop, screen_flash_callback, FuriEventLoopTimerTypeOnce, screen);
+    screen->sent_timer = furi_event_loop_timer_alloc(
+        event_loop, screen_sent_callback, FuriEventLoopTimerTypeOnce, screen);
 
     screen->view_port = view_port_alloc();
     view_port_draw_callback_set(screen->view_port, screen_draw_callback, screen);
@@ -60,6 +66,7 @@ void screen_free(Screen* screen) {
     gui_remove_view_port(screen->gui, screen->view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(screen->view_port);
+    furi_event_loop_timer_free(screen->sent_timer);
     furi_event_loop_timer_free(screen->flash_timer);
     furi_mutex_free(screen->mutex);
     free(screen);
@@ -82,7 +89,21 @@ void screen_set_state(Screen* screen, const ViewState* state) {
     view_port_update(screen->view_port);
 }
 
-void screen_flash(Screen* screen, Action action, uint32_t duration_ms) {
-    screen_show_flash(screen, action);
-    furi_event_loop_timer_start(screen->flash_timer, furi_ms_to_ticks(duration_ms));
+/* A timer of no ticks is not documented (event_loop_timer.h:69-74), so none stops it. */
+static void screen_set_timer(FuriEventLoopTimer* timer, uint32_t duration_ms) {
+    if(duration_ms > 0) {
+        furi_event_loop_timer_start(timer, furi_ms_to_ticks(duration_ms));
+    } else {
+        furi_event_loop_timer_stop(timer);
+    }
+}
+
+/* One set asks for one frame (screen_set_state): two would flash under `Connected` first. */
+void screen_confirm(Screen* screen, Action action, uint32_t flash_ms, uint32_t sent_ms) {
+    ViewState state = screen_state(screen);
+    state.flash = flash_ms > 0 ? action : ActionNone;
+    state.sent = sent_ms > 0 ? action : ActionNone;
+    screen_set_state(screen, &state);
+    screen_set_timer(screen->flash_timer, flash_ms);
+    screen_set_timer(screen->sent_timer, sent_ms);
 }

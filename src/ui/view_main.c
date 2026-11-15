@@ -6,6 +6,10 @@
 #include "view_plate.h"
 
 static const uint8_t view_main_battery_cells = 20;
+static const char* const view_main_effort_high = "effort high";
+static const char* const view_main_effort_max = "effort max";
+static const char* const view_main_clear = "clear";
+static const char* const view_main_esc = "Esc";
 
 static void view_main_draw_legend(Canvas* canvas) {
     view_plate_draw_outline(canvas, 74, 0, 53);
@@ -16,6 +20,48 @@ static void view_main_draw_legend(Canvas* canvas) {
 
 /* As the firmware's status bar draws it (power.c:17-48); u8g2 draws no box of zero width
  * (u8g2_box.c:40). */
+static void view_main_draw_sent(Canvas* canvas, Action sent) {
+    switch(sent) {
+    case ActionEffortHigh:
+        canvas_draw_icon(canvas, 41, 2, &I_slash);
+        canvas_draw_str(canvas, 45, 9, view_main_effort_high);
+        break;
+    case ActionEffortMax:
+        canvas_draw_icon(canvas, 41, 2, &I_slash);
+        canvas_draw_str(canvas, 45, 9, view_main_effort_max);
+        break;
+    case ActionClear:
+        canvas_draw_icon(canvas, 41, 2, &I_slash);
+        canvas_draw_str(canvas, 45, 9, view_main_clear);
+        break;
+    case ActionEsc:
+        canvas_draw_str(canvas, 41, 9, view_main_esc);
+        break;
+    case ActionEnter:
+        canvas_draw_icon(canvas, 41, 2, &I_enter);
+        break;
+    case ActionArrowLeft:
+        canvas_draw_icon(canvas, 41, 2, &I_left);
+        break;
+    case ActionArrowRight:
+        canvas_draw_icon(canvas, 41, 2, &I_right);
+        break;
+    case ActionArrowUp:
+        canvas_draw_icon(canvas, 41, 4, &I_up);
+        break;
+    case ActionArrowDown:
+        canvas_draw_icon(canvas, 41, 4, &I_down);
+        break;
+    case ActionNone:
+    case ActionVoiceStart:
+    case ActionVoiceStop:
+    case ActionExit:
+    case ActionGiveUp:
+    case ActionStartOver:
+        break;
+    }
+}
+
 static void view_main_draw_battery(Canvas* canvas, uint8_t charge, bool charging) {
     canvas_draw_icon(canvas, 99, 2, &I_battery);
     uint8_t cells = charge_cells(charge, view_main_battery_cells);
@@ -38,12 +84,12 @@ static void view_main_draw_ring(Canvas* canvas) {
     view_plate_draw_outline(canvas, 3, 14, 65);
     view_plate_draw_fill(canvas, 3, 14, 53);
     view_plate_draw_white_icon(canvas, 6, 15, &I_slash);
-    view_plate_draw_white_str(canvas, 10, 22, "effort high");
+    view_plate_draw_white_str(canvas, 10, 22, view_main_effort_high);
     canvas_draw_icon(canvas, 58, 17, &I_up);
     view_plate_draw_outline(canvas, 2, 52, 66);
     view_plate_draw_fill(canvas, 2, 52, 54);
     view_plate_draw_white_icon(canvas, 5, 54, &I_slash);
-    view_plate_draw_white_str(canvas, 9, 61, "effort max");
+    view_plate_draw_white_str(canvas, 9, 61, view_main_effort_max);
     canvas_draw_icon(canvas, 58, 55, &I_down);
 }
 
@@ -61,12 +107,12 @@ static void view_main_draw_side_actions(Canvas* canvas) {
     view_plate_draw_outline(canvas, 3, 33, 40);
     view_plate_draw_fill(canvas, 3, 33, 31);
     view_plate_draw_white_icon(canvas, 6, 35, &I_slash);
-    view_plate_draw_white_str(canvas, 10, 42, "clear");
+    view_plate_draw_white_str(canvas, 10, 42, view_main_clear);
     canvas_draw_icon(canvas, 36, 35, &I_left);
     view_plate_draw_outline(canvas, 80, 33, 30);
     view_plate_draw_fill(canvas, 89, 33, 21);
     canvas_draw_icon(canvas, 83, 35, &I_right);
-    view_plate_draw_white_str(canvas, 92, 42, "Esc");
+    view_plate_draw_white_str(canvas, 92, 42, view_main_esc);
     view_plate_draw_outline(canvas, 78, 46, 45);
     view_plate_draw_fill(canvas, 78, 46, 33);
     view_plate_draw_white_icon(canvas, 81, 48, &I_back);
@@ -119,6 +165,7 @@ static void view_main_draw_flash(Canvas* canvas, Action flash) {
 
 void view_main_draw(Canvas* canvas, const ViewState* state) {
     canvas_set_font(canvas, FontSecondary);
+    view_main_draw_sent(canvas, state->sent);
     if(state->legend) {
         view_main_draw_legend(canvas);
     } else {

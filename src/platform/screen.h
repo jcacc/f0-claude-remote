@@ -16,4 +16,4 @@ ViewState screen_state(Screen* screen);
 
 void screen_set_state(Screen* screen, const ViewState* state);
 
-void screen_flash(Screen* screen, Action action, uint32_t duration_ms);
+void screen_confirm(Screen* screen, Action action, uint32_t flash_ms, uint32_t sent_ms);

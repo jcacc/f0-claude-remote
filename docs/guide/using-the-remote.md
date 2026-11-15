@@ -41,8 +41,10 @@ which lists the previous conversation.
 Each action that sends buzzes once,
 and its part of the ring on the screen flashes:
 400 ms, or 100 ms for the arrows.
+The top row then reads `Sent:` and the button's label in place of `Connected`,
+for 3 s or until the next action.
 Stopping dictation, leaving the app, switching the link and a tap on Back do not buzz.
-With Vibration `Off` in the options nothing buzzes, and the flash alone confirms.
+With Vibration `Off` in the options nothing buzzes, and the screen alone confirms.
 The buzz means sent, not applied:
 with another window focused it comes all the same.
 

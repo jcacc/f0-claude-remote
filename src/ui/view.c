@@ -86,7 +86,10 @@ static void view_draw_stopped(Canvas* canvas, Link link) {
 void view_draw(Canvas* canvas, const ViewState* state) {
     switch(state->mode) {
     case ModeMain:
-        view_draw_title_row(canvas, view_links[state->link].mark, "Connected");
+        view_draw_title_row(
+            canvas,
+            view_links[state->link].mark,
+            state->sent == ActionNone ? "Connected" : "Sent:");
         view_main_draw(canvas, state);
         break;
     case ModeVoice:

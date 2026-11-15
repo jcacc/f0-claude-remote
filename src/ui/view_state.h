@@ -15,6 +15,7 @@ typedef struct {
     uint8_t charge;
     bool charging;
     Action flash;
+    Action sent;
     bool options[OptionMAX];
     Option cursor;
 } ViewState;

@@ -64,7 +64,8 @@ into the `ViewState` `screen.c` shows and sets it whole,
 hands `options_file.c` each option, which writes the options to the SD card unless it is the one held,
 then `transport_hid.c` that link, which switches to it unless it is the one in use.
 After step 7, it hands the firmware's dolphin the deed `deed.c` names,
-buzzes as `feedback.c` says of the action and Vibration, and has `screen.c` flash.
+buzzes as `feedback.c` says of the action and Vibration,
+and has `screen.c` flash the action and name it, each for `feedback.c`'s time.
 Then, after every event, `backlight.c` takes the light `display.c` gives the mode and Backlight.
 
 The link takes a second queue:

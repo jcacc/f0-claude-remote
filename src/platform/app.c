@@ -46,10 +46,7 @@ static void app_perform(App* app, Action action) {
     if(feedback_vibrates(action, keymap_option(app->keymap, OptionVibration))) {
         notification_message(app->notification, &sequence_single_vibro);
     }
-    uint32_t flash_ms = feedback_flash_ms(action);
-    if(flash_ms > 0) {
-        screen_flash(app->screen, action, flash_ms);
-    }
+    screen_confirm(app->screen, action, feedback_flash_ms(action), feedback_sent_ms(action));
     if(action == ActionExit) {
         furi_event_loop_stop(app->event_loop);
     }
@@ -173,7 +170,7 @@ App* app_alloc(void) {
     }
     app->backlight = backlight_alloc(
         display_light(keymap_mode(app->keymap), keymap_option(app->keymap, OptionBacklight)));
-    ViewState state = {.flash = ActionNone};
+    ViewState state = {.flash = ActionNone, .sent = ActionNone};
     app_follow_keymap(app, &state);
     app->screen = screen_alloc(app->event_loop, app->input_queue, &state);
     /* Ahead of the transport: the loop serves the first reading before any link report
