@@ -56,7 +56,11 @@ static void transport_bluetooth_free(void* instance) {
     bt_disconnect(bluetooth->bt);
     furi_delay_ms(transport_bluetooth_nvm_ms);
     bt_keys_storage_set_default_path(bluetooth->bt);
-    furi_check(bt_profile_restore_default(bluetooth->bt));
+    /* ESP32 port 2.0.0: re-creating a BLE profile at runtime can fail inside the
+     * firmware's GATT setup; failing to restore must not take the device down. */
+    if(!bt_profile_restore_default(bluetooth->bt)) {
+        FURI_LOG_W("ClaudeRemote", "bt_profile_restore_default failed");
+    }
     furi_record_close(RECORD_BT);
     free(bluetooth);
 }

@@ -1,6 +1,8 @@
 #include "view.h"
 
-#include <f0_claude_remote_icons.h>
+#include <gui/icon_i.h> /* ESP32 port: icon_get_width is not exported */
+
+#include "f0_claude_remote_icons.h"
 
 #include "view_main.h"
 #include "view_options.h"
@@ -33,7 +35,7 @@ static const ViewLink view_links[LinkMAX] = {
 static void view_draw_title_row(Canvas* canvas, const Icon* mark, const char* title) {
     canvas_draw_icon(canvas, 2, 1, mark);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, icon_get_width(mark) + 5, 9, title);
+    canvas_draw_str(canvas, ((const struct Icon*)mark)->width + 5, 9, title);
     canvas_draw_line(canvas, 0, 12, 127, 12);
 }
 

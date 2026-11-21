@@ -14,6 +14,29 @@ A Flipper Zero app that acts as a Bluetooth remote for Claude Code.
 
 </div>
 
+## LilyGo T-Embed CC1101 (ESP32 port) build
+
+> This fork modifies F0 Claude Remote to run on the
+> [Flipper Zero ESP32 port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port)
+> (firmware 2.0.0) on a LilyGo T-Embed CC1101. It is not a build for a stock Flipper Zero.
+
+Changes from upstream:
+
+- The port's app API lacks `furi_event_loop_*`, the power service, the USB HID state
+  callback and `icon_get_width`, so `src/platform/esp32_compat.[ch]` adds a small
+  polling event loop, battery and USB link state are polled, and icon width is read directly.
+- Charging state is not available to apps, so the battery icon never shows charging.
+- Exiting no longer crashes the device when the firmware fails to restore its default
+  Bluetooth profile.
+
+Controls on the rotary wheel: turn = Up/Down, click = Enter, hold wheel = voice,
+hold wheel + quick turn = Left/Right, side key = options, hold side key = exit.
+The wheel has no long press for Up/Down/Left/Right, so **Esc, `/clear`, the effort
+levels and the hold-Right USB switch are not reachable** on the T-Embed.
+
+Port 2.0.0's Bluetooth only survives one app-started profile per boot: boot with
+Bluetooth off in settings, then open the app first.
+
 ## Why
 
 Claude Code takes dictation, but a session still asks for the keyboard.

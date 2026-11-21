@@ -1,5 +1,7 @@
 #include "app.h"
 
+#include "esp32_compat.h"
+
 #include <dolphin/dolphin.h>
 #include <furi.h>
 #include <notification/notification_messages.h>

@@ -1,58 +1,53 @@
 #include "battery.h"
 
 #include <furi_hal_power.h>
-#include <power/power_service/power.h>
 
-#include "../core/charging.h"
+/* ESP32 port: the power service's pubsub and power_get_info are not exported to
+ * FAPs, so the charge is polled from the fuel-gauge capacity calls instead.
+ * Charging state is not exposed at all, so it always reads as not charging. */
+
+#define BATTERY_POLL_MS 30000
 
 struct Battery {
-    Power* power;
-    FuriPubSubSubscription* subscription;
+    FuriTimer* timer;
     FuriMessageQueue* charge_queue;
     FuriMessageQueue* charging_queue;
+    uint8_t last_charge;
 };
 
-static void battery_put_charging(Battery* battery, bool charging) {
-    furi_message_queue_put(battery->charging_queue, &charging, 0);
+static uint8_t battery_charge(void) {
+    uint32_t full = furi_hal_power_get_battery_full_capacity();
+    uint32_t remaining = furi_hal_power_get_battery_remaining_capacity();
+    if(full == 0) return 100;
+    uint32_t pct = remaining * 100 / full;
+    return pct > 100 ? 100 : (uint8_t)pct;
 }
 
-/* Runs on the power service's 1 KiB thread under its pubsub's lock (power.c:162-169,
- * pubsub.c:84-98), and event_loop.h binds its functions to the loop's own thread. */
-static void battery_event_callback(const void* message, void* context) {
-    const PowerEvent* event = message;
+/* Runs on the timer thread; a queue put is thread-safe. */
+static void battery_poll(void* context) {
     Battery* battery = context;
-    switch(event->type) {
-    case PowerEventTypeBatteryLevelChanged:
-        furi_message_queue_put(battery->charge_queue, &event->data.battery_level, 0);
-        break;
-    case PowerEventTypeStartCharging:
-        battery_put_charging(battery, true);
-        break;
-    case PowerEventTypeStopCharging:
-    case PowerEventTypeFullyCharged:
-        battery_put_charging(battery, false);
-        break;
+    uint8_t charge = battery_charge();
+    if(charge != battery->last_charge) {
+        battery->last_charge = charge;
+        furi_message_queue_put(battery->charge_queue, &charge, 0);
     }
 }
 
-/* Subscribes before reading: a change published between the two would otherwise be lost. */
 Battery* battery_alloc(FuriMessageQueue* charge_queue, FuriMessageQueue* charging_queue) {
     Battery* battery = malloc(sizeof(Battery));
     battery->charge_queue = charge_queue;
     battery->charging_queue = charging_queue;
-    battery->power = furi_record_open(RECORD_POWER);
-    battery->subscription =
-        furi_pubsub_subscribe(power_get_pubsub(battery->power), battery_event_callback, battery);
-    PowerInfo info;
-    power_get_info(battery->power, &info);
-    furi_message_queue_put(charge_queue, &info.charge, 0);
-    battery_put_charging(
-        battery, charging_now(info.is_charging, info.charge, furi_hal_power_is_charging_done()));
+    battery->last_charge = battery_charge();
+    furi_message_queue_put(charge_queue, &battery->last_charge, 0);
+    bool charging = false;
+    furi_message_queue_put(charging_queue, &charging, 0);
+    battery->timer = furi_timer_alloc(battery_poll, FuriTimerTypePeriodic, battery);
+    furi_timer_start(battery->timer, furi_ms_to_ticks(BATTERY_POLL_MS));
     return battery;
 }
 
 void battery_free(Battery* battery) {
-    furi_pubsub_unsubscribe(power_get_pubsub(battery->power), battery->subscription);
-    furi_record_close(RECORD_POWER);
+    furi_timer_stop(battery->timer);
+    furi_timer_free(battery->timer);
     free(battery);
 }

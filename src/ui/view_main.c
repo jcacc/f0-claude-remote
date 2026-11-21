@@ -1,6 +1,6 @@
 #include "view_main.h"
 
-#include <f0_claude_remote_icons.h>
+#include "f0_claude_remote_icons.h"
 
 #include "../core/charge.h"
 #include "view_plate.h"

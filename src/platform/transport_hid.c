@@ -1,5 +1,7 @@
 #include "transport_hid.h"
 
+#include "esp32_compat.h"
+
 #include <furi_hal_usb_hid.h>
 
 #include "transport_bluetooth.h"

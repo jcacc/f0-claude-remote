@@ -6,6 +6,8 @@
 typedef struct {
     FuriMessageQueue* link_queue;
     FuriHalUsbInterface* previous;
+    FuriTimer* poll_timer;
+    bool connected;
 } TransportUsb;
 
 /* The firmware's own IDs, furi_hal_usb_hid.c:16-17: a config replaces them, and nobody assigned
@@ -16,10 +18,17 @@ static FuriHalUsbHidConfig transport_usb_config = {
     .product = "Claude Remote",
 };
 
-/* Runs in the USB interrupt (furi_hal_usb.c:320), where a queue put takes timeout 0. */
-static void transport_usb_state_callback(bool connected, void* context) {
-    FuriMessageQueue* link_queue = context;
-    furi_message_queue_put(link_queue, &connected, 0);
+/* ESP32 port: furi_hal_hid_set_state_callback is not exported to FAPs, so the
+ * link state is polled on the timer thread and reported on change. */
+#define TRANSPORT_USB_POLL_MS 250
+
+static void transport_usb_poll(void* context) {
+    TransportUsb* usb = context;
+    bool connected = furi_hal_hid_is_connected();
+    if(connected != usb->connected) {
+        usb->connected = connected;
+        furi_message_queue_put(usb->link_queue, &connected, 0);
+    }
 }
 
 static void* transport_usb_alloc(FuriMessageQueue* link_queue) {
@@ -30,14 +39,17 @@ static void* transport_usb_alloc(FuriMessageQueue* link_queue) {
     /* The stock order, hid.c:177-187. An open RPC session locks the switch (rpc_cli.c:49). */
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, &transport_usb_config));
-    furi_hal_hid_set_state_callback(transport_usb_state_callback, link_queue);
+    usb->connected = false;
+    usb->poll_timer = furi_timer_alloc(transport_usb_poll, FuriTimerTypePeriodic, usb);
+    furi_timer_start(usb->poll_timer, furi_ms_to_ticks(TRANSPORT_USB_POLL_MS));
 
     return usb;
 }
 
 static void transport_usb_free(void* instance) {
     TransportUsb* usb = instance;
-    furi_hal_hid_set_state_callback(NULL, NULL);
+    furi_timer_stop(usb->poll_timer);
+    furi_timer_free(usb->poll_timer);
     furi_hal_usb_set_config(usb->previous, NULL);
     free(usb);
 }

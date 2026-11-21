@@ -1,6 +1,6 @@
 #include "view_options.h"
 
-#include <f0_claude_remote_icons.h>
+#include "f0_claude_remote_icons.h"
 
 #include "view_plate.h"
 

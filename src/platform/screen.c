@@ -1,5 +1,7 @@
 #include "screen.h"
 
+#include "esp32_compat.h"
+
 #include <gui/gui.h>
 
 #include "../ui/view.h"
